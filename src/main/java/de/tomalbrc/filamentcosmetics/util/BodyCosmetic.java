@@ -20,7 +20,7 @@ public class BodyCosmetic {
     private final ServerPlayer player;
 
     public BodyCosmetic(ServerPlayer player){
-        this.bodyCosmetics = new Display.ItemDisplay(EntityType.ITEM_DISPLAY, player.serverLevel());
+        this.bodyCosmetics = new Display.ItemDisplay(EntityType.ITEM_DISPLAY, player.level());
         this.player = player;
     }
 
@@ -38,10 +38,10 @@ public class BodyCosmetic {
         bodyCosmetics.setInvulnerable(true);
         bodyCosmetics.setNoGravity(true);
 
-        player.serverLevel().getChunkSource().broadcastAndSend(player,
+        player.level().getChunkSource().broadcastAndSend(player,
                 new ClientboundAddEntityPacket(bodyCosmetics, 1, bodyCosmetics.blockPosition()));
 
-        player.serverLevel().getChunkSource().broadcastAndSend(player,
+        player.level().getChunkSource().broadcastAndSend(player,
                 new ClientboundSetEntityDataPacket(bodyCosmetics.getId(),
                         bodyCosmetics.getEntityData().getNonDefaultValues()));
 
@@ -97,7 +97,7 @@ public class BodyCosmetic {
 
         // --- SENDING THE PACKET ---
         // Now we send the update packet with our predicted yaw and pitch.
-        player.serverLevel().getChunkSource().broadcastAndSend(player,
+        player.level().getChunkSource().broadcastAndSend(player,
                 new ClientboundMoveEntityPacket.Rot(
                         bodyCosmetics.getId(),
                         (byte) Mth.floor(yawToUse * 256.0F / 360.0F),

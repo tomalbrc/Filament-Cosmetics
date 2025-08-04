@@ -4,6 +4,7 @@ import de.tomalbrc.filamentcosmetics.config.entries.ItemType;
 import de.tomalbrc.filamentcosmetics.database.DatabaseManager;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 
 public class HatCosmetic {
@@ -24,7 +25,7 @@ public class HatCosmetic {
 
         ItemStack targetItemStack;
         if(cosmeticItemStack.isEmpty() || cosmeticItemStack == ItemStack.EMPTY) {
-            targetItemStack = player.getInventory().getArmor(3);
+            targetItemStack = player.getItemBySlot(EquipmentSlot.HEAD);
         } else {
             targetItemStack = cosmeticStack;
         }

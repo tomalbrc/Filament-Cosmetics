@@ -2,7 +2,6 @@ package de.tomalbrc.filamentcosmetics.config;
 
 import de.tomalbrc.filamentcosmetics.FilamentCosmetics;
 import de.tomalbrc.filamentcosmetics.util.Utils;
-import eu.pb4.polymer.resourcepack.api.PolymerModelData;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import org.simpleyaml.configuration.ConfigurationSection;
 import org.simpleyaml.configuration.comments.format.YamlCommentFormat;
@@ -128,19 +127,19 @@ public abstract class AbstractGuiConfig {
         }
         String complitedItemString = baseItemString.contains(":") ? baseItemString : "minecraft:" + baseItemString.toLowerCase();
 
-        Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(complitedItemString));
-        if (item == BuiltInRegistries.ITEM.get(BuiltInRegistries.ITEM.getDefaultKey()) && !complitedItemString.equals(BuiltInRegistries.ITEM.getDefaultKey().toString())) {
+        Item item = BuiltInRegistries.ITEM.getValue(ResourceLocation.parse(complitedItemString));
+        if (item == BuiltInRegistries.ITEM.getValue(BuiltInRegistries.ITEM.getDefaultKey()) && !complitedItemString.equals(BuiltInRegistries.ITEM.getDefaultKey().toString())) {
             FilamentCosmetics.LOGGER.error("Button '{}' in {} has invalid item id: {}. Defaulting to paper.", buttonKey, this.configFilePath.getFileName(), complitedItemString);
-            item = BuiltInRegistries.ITEM.get(ResourceLocation.parse("minecraft:paper"));
+            item = BuiltInRegistries.ITEM.getValue(ResourceLocation.parse("minecraft:paper"));
             complitedItemString = "minecraft:paper";
         }
 
-        PolymerModelData polymerModelData = null;
+        ResourceLocation polymerModelData = null;
         if (yamlFile.isSet(basePath + ".textureName")) {
             String textureName = yamlFile.getString(basePath + ".textureName");
             if (textureName != null && !textureName.isEmpty()) {
                 try {
-                    polymerModelData = PolymerResourcePackUtils.requestModel(item, ResourceLocation.fromNamespaceAndPath(FilamentCosmetics.MOD_ID, "item/" + textureName));
+                    polymerModelData = ResourceLocation.fromNamespaceAndPath(FilamentCosmetics.MOD_ID, "item/" + textureName);
                 } catch (Exception e) {
                     FilamentCosmetics.LOGGER.error("Failed to request model for button '{}' (item: {}, texture: {}): {}", buttonKey, complitedItemString, textureName, e.getMessage());
                 }
@@ -189,7 +188,7 @@ public abstract class AbstractGuiConfig {
         ConfigManager.NavigationButton button = navigationButtons.get(buttonKey);
         if (button == null) {
             FilamentCosmetics.LOGGER.warn("Requested non-existent button config: '{}' from {}", buttonKey, this.configFilePath.getFileName());
-            return new ConfigManager.NavigationButton(Component.literal("Error"), BuiltInRegistries.ITEM.get(ResourceLocation.parse("minecraft:barrier")), null, 0, Collections.emptyList());
+            return new ConfigManager.NavigationButton(Component.literal("Error"), BuiltInRegistries.ITEM.getValue(ResourceLocation.parse("minecraft:barrier")), null, 0, Collections.emptyList());
         }
         return button;
     }

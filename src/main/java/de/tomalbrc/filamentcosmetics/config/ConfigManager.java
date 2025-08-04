@@ -4,23 +4,15 @@ import com.mojang.brigadier.context.CommandContext;
 import de.tomalbrc.filamentcosmetics.FilamentCosmetics;
 import de.tomalbrc.filamentcosmetics.config.entries.CustomItemRegistry;
 import de.tomalbrc.filamentcosmetics.util.Utils;
-import eu.pb4.polymer.resourcepack.api.PolymerArmorModel;
-import eu.pb4.polymer.resourcepack.api.PolymerModelData;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.component.CustomData;
-import net.minecraft.world.item.component.CustomModelData;
-import net.minecraft.world.item.component.DyedItemColor;
-import net.minecraft.world.item.component.ItemLore;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.simpleyaml.configuration.comments.format.YamlCommentFormat;
@@ -31,11 +23,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static de.tomalbrc.filamentcosmetics.FilamentCosmetics.id;
 
 public class ConfigManager {
     public static final Path SERVER_COSMETICS_DIR = FabricLoader.getInstance().getConfigDir().resolve("FilamentCosmetics");
@@ -43,7 +35,7 @@ public class ConfigManager {
     private static final String TARGET_TEXTURE_PATH = "assets/filamentcosmetics/textures/";
     private static final String TARGET_MODEL_PATH = "assets/filamentcosmetics/models/item/";
 
-    public record NavigationButton(Component name, Item baseItem, PolymerModelData polymerModelData, int slotIndex, List<String> lore) {}
+    public record NavigationButton(Component name, Item baseItem, ResourceLocation model, int slotIndex, List<String> lore) {}
 
     public static String configReloadPermission;
     public static String itemSkinsReloadPermission;
@@ -286,59 +278,8 @@ public class ConfigManager {
     }
 
     public static ItemStack createItemStack(String baseMaterialId, Component displayName, String cosmeticOrSkinId, List<Component> loreTexts) {
-        Item baseItem = BuiltInRegistries.ITEM.get(ResourceLocation.parse(baseMaterialId));
-        if (baseItem == BuiltInRegistries.ITEM.get(BuiltInRegistries.ITEM.getDefaultKey()) && !baseMaterialId.equals(BuiltInRegistries.ITEM.getDefaultKey().toString())) {
-            FilamentCosmetics.LOGGER.warn("Invalid baseMaterialId '{}' for item '{}'. Defaulting to minecraft:paper.", baseMaterialId, cosmeticOrSkinId);
-            baseItem = BuiltInRegistries.ITEM.get(ResourceLocation.parse("minecraft:paper")); // Fallback
-        }
-
-        PolymerModelData polymerModel;
-        try {
-            if (baseItem instanceof ArmorItem armorItem && armorItem.getType() != ArmorItem.Type.BODY) {
-                String modelIdPath = "item/armor/" + cosmeticOrSkinId + "_" + armorItem.getType().getName().toLowerCase();
-                polymerModel = PolymerResourcePackUtils.requestModel(getItemFor(armorItem.getType()), id(modelIdPath));
-            } else {
-                polymerModel = PolymerResourcePackUtils.requestModel(baseItem, ResourceLocation.fromNamespaceAndPath(FilamentCosmetics.MOD_ID, "item/" + cosmeticOrSkinId));
-            }
-        } catch (Exception e) {
-            FilamentCosmetics.LOGGER.error("Failed to request model for item id '{}' with base item '{}': {}", cosmeticOrSkinId, baseMaterialId, e.getMessage());
-            ItemStack errorStack = new ItemStack(baseItem);
-            errorStack.set(DataComponents.CUSTOM_NAME, Component.literal("Error: " + cosmeticOrSkinId));
-            return errorStack;
-        }
-
-
-        ItemStack itemStack = new ItemStack(polymerModel.item());
-
-        itemStack.update(DataComponents.CUSTOM_DATA, CustomData.EMPTY, comp -> comp.update(nbt -> {
-            nbt.putString("cosmeticItemId", cosmeticOrSkinId);
-        }));
-
-        if (baseItem instanceof ArmorItem armorItem && armorItem.getType() != ArmorItem.Type.BODY) {
-            PolymerArmorModel armorModel = PolymerResourcePackUtils.requestArmor(id(cosmeticOrSkinId));
-            itemStack.set(DataComponents.DYED_COLOR, new DyedItemColor(armorModel.color(), true));
-        }
-
-        if (loreTexts != null && !loreTexts.isEmpty()) {
-            itemStack.set(DataComponents.LORE, new ItemLore(loreTexts));
-        } else {
-            itemStack.set(DataComponents.LORE, new ItemLore(Collections.emptyList()));
-        }
-
-        itemStack.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(polymerModel.value()));
-        itemStack.set(DataComponents.CUSTOM_NAME, displayName);
-
-        return itemStack;
-    }
-
-    private static Item getItemFor(ArmorItem.Type type) {
-        return switch (type) {
-            case ArmorItem.Type.HELMET -> Items.LEATHER_HELMET;
-            case ArmorItem.Type.CHESTPLATE -> Items.LEATHER_CHESTPLATE;
-            case ArmorItem.Type.LEGGINGS -> Items.LEATHER_LEGGINGS;
-            case ArmorItem.Type.BOOTS -> Items.LEATHER_BOOTS;
-            default -> Items.STONE;
-        };
+        Item baseItem = BuiltInRegistries.ITEM.getValue(ResourceLocation.parse(baseMaterialId));
+        return baseItem.getDefaultInstance();
     }
 
     public static List<Path> listFiles(Path dir) {

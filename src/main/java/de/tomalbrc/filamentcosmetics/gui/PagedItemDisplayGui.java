@@ -93,7 +93,7 @@ public class PagedItemDisplayGui extends SimpleGui {
     }
 
     private IItemAction determineAction(CustomItemEntry entry) {
-        Item baseItem = BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(entry.baseItemForModel()));
+        Item baseItem = BuiltInRegistries.ITEM.getValue(ResourceLocation.tryParse(entry.baseItemForModel()));
         if (Items.LEATHER_HORSE_ARMOR.equals(baseItem)) {
             return new OpenColorPickerAction();
         }

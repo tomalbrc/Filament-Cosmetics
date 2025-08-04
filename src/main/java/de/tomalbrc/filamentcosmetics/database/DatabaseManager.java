@@ -98,7 +98,7 @@ public class DatabaseManager {
 
             ItemStack cosmeticStack = cosmeticDefinition.itemStack().copy();
             if (cosmeticData.dyedColor != null) {
-                cosmeticStack.set(DataComponents.DYED_COLOR, new DyedItemColor(cosmeticData.dyedColor, true));
+                cosmeticStack.set(DataComponents.DYED_COLOR, new DyedItemColor(cosmeticData.dyedColor));
             }
             return cosmeticStack;
         } catch (SQLException e) {
@@ -118,9 +118,7 @@ public class DatabaseManager {
         CustomData customData = stack.get(DataComponents.CUSTOM_DATA);
         if (customData != null) {
             CompoundTag nbt = customData.copyTag();
-            if (nbt.contains("cosmeticItemId", CompoundTag.TAG_STRING)) {
-                return nbt.getString("cosmeticItemId");
-            }
+            return nbt.getString("cosmeticItemId").orElse(null);
         }
         return null;
     }

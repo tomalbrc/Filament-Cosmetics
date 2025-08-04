@@ -1,9 +1,9 @@
 plugins {
-	id 'fabric-loom' version '1.9-SNAPSHOT'
+	id 'fabric-loom' version '1.11-SNAPSHOT'
 	id 'maven-publish'
 }
 
-version = project.mod_version
+version = project.mod_version + "+" + project.minecraft_version
 group = project.maven_group
 
 base {
@@ -45,12 +45,11 @@ dependencies {
 	modImplementation ("eu.pb4:polymer-virtual-entity:[${polymer_version}]")
 	modImplementation ("eu.pb4:polymer-autohost:${polymer_version}")
 
-	modImplementation include ("eu.pb4:factorytools:[${factorytools_version}]")
-
 	include(modImplementation "net.kyori:adventure-api:${project.adventure_version}")
 	include(modImplementation "net.kyori:adventure-text-serializer-legacy:${project.adventure_version}")
 	include(modImplementation "net.kyori:adventure-text-minimessage:${project.adventure_version}")
 	include(modImplementation "net.kyori:adventure-platform-fabric:${project.adventure_platform_version}")
+
 }
 
 processResources {

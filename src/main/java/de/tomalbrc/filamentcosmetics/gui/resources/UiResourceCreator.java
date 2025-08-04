@@ -3,21 +3,20 @@ package de.tomalbrc.filamentcosmetics.gui.resources;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.tomalbrc.filamentcosmetics.FilamentCosmetics;
-import eu.pb4.polymer.resourcepack.api.PolymerModelData;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import it.unimi.dsi.fastutil.chars.Char2IntMap;
 import it.unimi.dsi.fastutil.chars.Char2IntOpenHashMap;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Tuple;
+
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Tuple;
-
 
 public class UiResourceCreator {
     private static final String ITEM_TEMPLATE = """
@@ -31,7 +30,7 @@ public class UiResourceCreator {
     public static final Style STYLE = Style.EMPTY.withColor(0xFFFFFF).withFont(FilamentCosmetics.id("gui"));
     private static char character = 'a';
     private static final Char2IntMap SPACES = new Char2IntOpenHashMap();
-    private static final List<Tuple<PolymerModelData, String>> SIMPLE_MODEL = new ArrayList<>();
+    private static final List<Tuple<ResourceLocation, String>> SIMPLE_MODEL = new ArrayList<>();
     private static final List<FontTexture> FONT_TEXTURES = new ArrayList<>();
     private static final char CHEST_SPACE0 = character++;
     private static final char CHEST_SPACE1 = character++;
@@ -50,8 +49,8 @@ public class UiResourceCreator {
 
     public static void generateAssets(BiConsumer<String, byte[]> assetWriter) {
         for (var texture : SIMPLE_MODEL) {
-            assetWriter.accept("assets/" + texture.getA().modelPath().getNamespace() + "/models/" + texture.getA().modelPath().getPath() + ".json",
-                    ITEM_TEMPLATE.replace("|ID|", texture.getA().modelPath().toString()).replace("|BASE|", texture.getB()).getBytes(StandardCharsets.UTF_8));
+            assetWriter.accept("assets/" + texture.getA().getNamespace() + "/models/" + texture.getA().getPath() + ".json",
+                    ITEM_TEMPLATE.replace("|ID|", texture.getA().toString()).replace("|BASE|", texture.getB()).getBytes(StandardCharsets.UTF_8));
         }
 
         var fontBase = new JsonObject();

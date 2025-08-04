@@ -3,7 +3,6 @@ package de.tomalbrc.filamentcosmetics.config;
 import de.tomalbrc.filamentcosmetics.FilamentCosmetics;
 import de.tomalbrc.filamentcosmetics.gui.resources.GuiTextures;
 import de.tomalbrc.filamentcosmetics.util.Utils;
-import eu.pb4.polymer.resourcepack.api.PolymerModelData;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -23,7 +22,7 @@ public class CosmeticsGUIConfig extends AbstractGuiConfig {
     public static String colorPickerGUINameString;
     public static float saturationAdjustmentValue;
     public static String signType;
-    public static PolymerModelData paintItemPolymerModelData;
+    public static ResourceLocation paintItemModel;
     public static DyeColor signColor;
     public static String successMessageString;
     public static String errorMessageString;
@@ -78,13 +77,13 @@ public class CosmeticsGUIConfig extends AbstractGuiConfig {
         String paintItemModelPath = file.getString("paintItemModelPath");
         if (paintItemModelPath != null && !paintItemModelPath.isEmpty()) {
             try {
-                paintItemPolymerModelData = PolymerResourcePackUtils.requestModel(Items.LEATHER_HORSE_ARMOR, ResourceLocation.fromNamespaceAndPath(FilamentCosmetics.MOD_ID, "item/" + paintItemModelPath));
+                paintItemModel = ResourceLocation.fromNamespaceAndPath(FilamentCosmetics.MOD_ID, "item/" + paintItemModelPath);
             } catch (Exception e) {
                 FilamentCosmetics.LOGGER.error("Failed to load paintItemModelData for path '{}': {}", paintItemModelPath, e.getMessage());
-                paintItemPolymerModelData = null;
+                paintItemModel = null;
             }
         } else {
-            paintItemPolymerModelData = null;
+            paintItemModel = null;
         }
 
 

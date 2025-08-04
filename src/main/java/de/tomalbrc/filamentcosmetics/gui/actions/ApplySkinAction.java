@@ -5,7 +5,6 @@ import de.tomalbrc.filamentcosmetics.gui.core.IItemAction;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.CustomModelData;
@@ -21,15 +20,12 @@ public class ApplySkinAction implements IItemAction {
 
     @Override
     public void execute(ServerPlayer player, CustomItemEntry entry, SimpleGui gui) {
+        // TODO: Filament skin component
 
         targetItemStack.update(DataComponents.CUSTOM_DATA, CustomData.EMPTY, comp ->
                 comp.update(nbt -> nbt.putString("cosmeticItemId", entry.id()))
         );
-        targetItemStack.set(DataComponents.CUSTOM_MODEL_DATA, entry.itemStack().getOrDefault(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(0)));
-
-        if (entry.itemStack().getItem() instanceof ArmorItem armorItem && armorItem.getType() != ArmorItem.Type.BODY) {
-            // TODO: Rewrite the whole itemskins thing
-        }
+        targetItemStack.set(DataComponents.ITEM_MODEL, entry.itemStack().get(DataComponents.ITEM_MODEL));
 
         gui.setSlot(itemDisplaySlot, targetItemStack.copy());
     }
