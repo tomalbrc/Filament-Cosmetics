@@ -5,33 +5,30 @@
 	"name": "ServerCosmetics",
 	"description": "This is an example description! Tell everyone what your mod is about!",
 	"authors": [
+		"tomalbrc",
 		"Stikulzon"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"sources": "https://github.com/tomalbrc/Filament-Cosmetics"
 	},
 	"license": "CC0-1.0",
-	"icon": "assets/servercosmetics/icon.png",
+	"icon": "icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.zefir.servercosmetics.ServerCosmetics"
+			"de.tomalbrc.filamentcosmetics.FilamentCosmetics"
 		],
 		"fabric-datagen": [
-			"com.zefir.servercosmetics.ServerCosmeticsDataGenerator"
+			"de.tomalbrc.filamentcosmetics.FilamentCosmeticsDataGenerator"
 		]
 	},
 	"mixins": [
-		"servercosmetics.mixins.json"
+		"filamentcosmetics.mixins.json"
 	],
 	"depends": {
-		"fabricloader": ">=0.15.11",
+		"fabricloader": ">=0.16.14",
 		"minecraft": "~1.21",
 		"java": ">=21",
 		"fabric-api": "*"
-	},
-	"suggests": {
-		"luckperms": ">=5.4.102"
 	}
 }

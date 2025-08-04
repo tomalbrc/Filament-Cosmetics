@@ -1,6 +1,8 @@
 # Filament-Cosmetics
 
-Cosmetic GUI for filament cosmetics
+Cosmetic GUI for filaments wearable cosmetics, item skins and the Balloons mod!
+
+
 
 
 
