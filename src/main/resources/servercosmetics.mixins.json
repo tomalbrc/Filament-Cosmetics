@@ -1,6 +1,6 @@
 {
   "required": true,
-  "package": "com.zefir.servercosmetics.mixin",
+  "package": "de.tomalbrc.filamentcosmetics.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "ArmorHeadSlotMixin",
