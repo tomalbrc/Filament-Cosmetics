@@ -1,9 +1,9 @@
 {
 	"schemaVersion": 1,
-	"id": "servercosmetics",
+	"id": "filamentcosmetics",
 	"version": "${version}",
-	"name": "ServerCosmetics",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"name": "Filament Cosmetics",
+	"description": "GUI for filament cosmetics",
 	"authors": [
 		"tomalbrc",
 		"Stikulzon"
