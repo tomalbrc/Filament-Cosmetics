@@ -10,13 +10,12 @@ import de.tomalbrc.filamentcosmetics.config.entries.CustomItemEntry;
 import de.tomalbrc.filamentcosmetics.config.entries.CustomItemRegistry;
 import de.tomalbrc.filamentcosmetics.config.entries.ItemType;
 import me.lucko.fabric.api.permissions.v0.Permissions;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.DyedColorComponent;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.network.ServerPlayerEntity;
-
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.DyedItemColor;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,9 +38,9 @@ public class DatabaseManager {
 
     public static void init() {}
 
-    public static void setCosmetic(ServerPlayerEntity player, ItemType type, ItemStack itemStack) {
+    public static void setCosmetic(ServerPlayer player, ItemType type, ItemStack itemStack) {
         try {
-            CosmeticTable existingEntry = findEntry(player.getUuidAsString(), type);
+            CosmeticTable existingEntry = findEntry(player.getStringUUID(), type);
 
             if (itemStack == null || itemStack.isEmpty()) {
                 if (existingEntry != null) {
@@ -52,7 +51,7 @@ public class DatabaseManager {
 
             String cosmeticId = getCosmeticIdFromStack(itemStack);
             if (cosmeticId == null) {
-                FilamentCosmetics.LOGGER.warn("Attempted to set a cosmetic with an ItemStack lacking a 'cosmeticItemId' for player {}", player.getUuidAsString());
+                FilamentCosmetics.LOGGER.warn("Attempted to set a cosmetic with an ItemStack lacking a 'cosmeticItemId' for player {}", player.getStringUUID());
                 if (existingEntry != null) {
                     cosmeticDao.delete(existingEntry);
                 }
@@ -67,21 +66,21 @@ public class DatabaseManager {
                 cosmeticDao.update(existingEntry);
             } else {
                 CosmeticTable newEntry = new CosmeticTable();
-                newEntry.setUuid(player.getUuidAsString());
+                newEntry.setUuid(player.getStringUUID());
                 newEntry.setCosmeticType(type.toString());
                 newEntry.setCosmeticId(cosmeticId);
                 newEntry.setDyedColor(dyedColor);
                 cosmeticDao.create(newEntry);
             }
         } catch (SQLException e) {
-            FilamentCosmetics.LOGGER.error("Error saving cosmetic data for player {} and type {}", player.getUuidAsString(), type, e);
+            FilamentCosmetics.LOGGER.error("Error saving cosmetic data for player {} and type {}", player.getStringUUID(), type, e);
             throw new RuntimeException("Error saving cosmetic data", e);
         }
     }
 
-    public static ItemStack getCosmetic(ServerPlayerEntity player, ItemType type) {
+    public static ItemStack getCosmetic(ServerPlayer player, ItemType type) {
         try {
-            CosmeticTable cosmeticData = findEntry(player.getUuidAsString(), type);
+            CosmeticTable cosmeticData = findEntry(player.getStringUUID(), type);
 
             if (cosmeticData == null || cosmeticData.getCosmeticId() == null) {
                 return ItemStack.EMPTY;
@@ -99,11 +98,11 @@ public class DatabaseManager {
 
             ItemStack cosmeticStack = cosmeticDefinition.itemStack().copy();
             if (cosmeticData.getDyedColor() != null) {
-                cosmeticStack.set(DataComponentTypes.DYED_COLOR, new DyedColorComponent(cosmeticData.getDyedColor(), true));
+                cosmeticStack.set(DataComponents.DYED_COLOR, new DyedItemColor(cosmeticData.getDyedColor(), true));
             }
             return cosmeticStack;
         } catch (SQLException e) {
-            FilamentCosmetics.LOGGER.error("Error loading cosmetic data for player {} and type {}", player.getUuidAsString(), type, e);
+            FilamentCosmetics.LOGGER.error("Error loading cosmetic data for player {} and type {}", player.getStringUUID(), type, e);
             throw new RuntimeException("Error loading cosmetic data", e);
         }
     }
@@ -116,10 +115,10 @@ public class DatabaseManager {
     }
 
     private static String getCosmeticIdFromStack(ItemStack stack) {
-        NbtComponent customData = stack.get(DataComponentTypes.CUSTOM_DATA);
+        CustomData customData = stack.get(DataComponents.CUSTOM_DATA);
         if (customData != null) {
-            NbtCompound nbt = customData.copyNbt();
-            if (nbt.contains("cosmeticItemId", NbtCompound.STRING_TYPE)) {
+            CompoundTag nbt = customData.copyTag();
+            if (nbt.contains("cosmeticItemId", CompoundTag.TAG_STRING)) {
                 return nbt.getString("cosmeticItemId");
             }
         }
@@ -127,7 +126,7 @@ public class DatabaseManager {
     }
 
     private static Integer getDyedColorFromStack(ItemStack stack) {
-        DyedColorComponent dyedColor = stack.get(DataComponentTypes.DYED_COLOR);
+        DyedItemColor dyedColor = stack.get(DataComponents.DYED_COLOR);
         return dyedColor != null ? dyedColor.rgb() : null;
     }
 }

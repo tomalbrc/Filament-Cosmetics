@@ -1,14 +1,14 @@
 package de.tomalbrc.filamentcosmetics.mixin;
 
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.s2c.play.EntityPassengersSetS2CPacket;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(EntityPassengersSetS2CPacket.class)
+@Mixin(ClientboundSetPassengersPacket.class)
 public interface EntityPassengersSetS2CPacketAccessor {
     @Invoker("<init>")
-    static EntityPassengersSetS2CPacket invokeInit(PacketByteBuf buf) {
+    static ClientboundSetPassengersPacket invokeInit(FriendlyByteBuf buf) {
         throw new AssertionError();
     }
 }

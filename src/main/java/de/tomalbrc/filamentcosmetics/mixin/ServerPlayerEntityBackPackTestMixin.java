@@ -3,14 +3,14 @@ package de.tomalbrc.filamentcosmetics.mixin;
 import de.tomalbrc.filamentcosmetics.ext.ICosmetics;
 import de.tomalbrc.filamentcosmetics.util.BodyCosmetic;
 import de.tomalbrc.filamentcosmetics.util.HatCosmetic;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(ServerPlayerEntity.class)
+@Mixin(ServerPlayer.class)
 public abstract class ServerPlayerEntityBackPackTestMixin implements ICosmetics {
     @Unique
     private BodyCosmetic bodyCosmetic;
@@ -19,7 +19,7 @@ public abstract class ServerPlayerEntityBackPackTestMixin implements ICosmetics 
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void init(CallbackInfo ci) {
-        ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
+        ServerPlayer player = (ServerPlayer) (Object) this;
         bodyCosmetic = new BodyCosmetic(player);
         hatCosmetic = new HatCosmetic(player);
     }

@@ -4,26 +4,26 @@ import de.tomalbrc.filamentcosmetics.config.entries.ItemType;
 import de.tomalbrc.filamentcosmetics.database.DatabaseManager;
 import de.tomalbrc.filamentcosmetics.mixin.EntityPassengersSetS2CPacketAccessor;
 import io.netty.buffer.Unpooled;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.decoration.DisplayEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.s2c.play.EntityS2CPacket;
-import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
-import net.minecraft.network.packet.s2c.play.EntityTrackerUpdateS2CPacket;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Display;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.ItemStack;
 
 import static de.tomalbrc.filamentcosmetics.database.DatabaseManager.setCosmetic;
 
 public class BodyCosmetic {
 
-    private final DisplayEntity.ItemDisplayEntity bodyCosmetics;
+    private final Display.ItemDisplay bodyCosmetics;
     private ItemStack cosmeticItemStack = ItemStack.EMPTY;
-    private final ServerPlayerEntity player;
+    private final ServerPlayer player;
 
-    public BodyCosmetic(ServerPlayerEntity player){
-        this.bodyCosmetics = new DisplayEntity.ItemDisplayEntity(EntityType.ITEM_DISPLAY, player.getServerWorld());
+    public BodyCosmetic(ServerPlayer player){
+        this.bodyCosmetics = new Display.ItemDisplay(EntityType.ITEM_DISPLAY, player.serverLevel());
         this.player = player;
     }
 
@@ -35,18 +35,18 @@ public class BodyCosmetic {
 
     public void initNewCosmetic() {
         this.cosmeticItemStack = DatabaseManager.getCosmetic(player, ItemType.BODY_COSMETIC);
-        bodyCosmetics.setPosition(player.getX(), player.getY(), player.getZ());
+        bodyCosmetics.setPos(player.getX(), player.getY(), player.getZ());
 
         bodyCosmetics.setItemStack(cosmeticItemStack);
         bodyCosmetics.setInvulnerable(true);
         bodyCosmetics.setNoGravity(true);
 
-        player.getServerWorld().getChunkManager().sendToNearbyPlayers(player,
-                new EntitySpawnS2CPacket(bodyCosmetics, 1, bodyCosmetics.getBlockPos()));
+        player.serverLevel().getChunkSource().broadcastAndSend(player,
+                new ClientboundAddEntityPacket(bodyCosmetics, 1, bodyCosmetics.blockPosition()));
 
-        player.getServerWorld().getChunkManager().sendToNearbyPlayers(player,
-                new EntityTrackerUpdateS2CPacket(bodyCosmetics.getId(),
-                        bodyCosmetics.getDataTracker().getChangedEntries()));
+        player.serverLevel().getChunkSource().broadcastAndSend(player,
+                new ClientboundSetEntityDataPacket(bodyCosmetics.getId(),
+                        bodyCosmetics.getEntityData().getNonDefaultValues()));
 
         sendPassengersPacket(player, bodyCosmetics);
         bodyCosmetics.startRiding(player);
@@ -55,16 +55,16 @@ public class BodyCosmetic {
     public void tick() {
         // We still position the cosmetic at the player's location.
         // The Y-offset might need adjustment based on the pose (e.g., sneaking).
-        double yOffset = player.isSneaking() ? 1.55 : 1.8;
-        bodyCosmetics.setPosition(player.getX(), player.getY() + yOffset, player.getZ());
+        double yOffset = player.isShiftKeyDown() ? 1.55 : 1.8;
+        bodyCosmetics.setPos(player.getX(), player.getY() + yOffset, player.getZ());
 
         // --- YAW PREDICTION ---
         // This is the core logic for replicating the client's rendered body yaw.
 
         float yawToUse;
         // Get horizontal velocity squared. Using squared values avoids a square root calculation.
-        double velX = player.getVelocity().getX();
-        double velZ = player.getVelocity().getZ();
+        double velX = player.getDeltaMovement().x();
+        double velZ = player.getDeltaMovement().z();
         double horizontalVelocitySq = velX * velX + velZ * velZ;
 
         // Check if the player is moving horizontally.
@@ -72,11 +72,11 @@ public class BodyCosmetic {
         if (horizontalVelocitySq > 1.0E-6) {
             // If moving, the client renders the body facing the same direction as the head.
             // So, we use the player's head yaw.
-            yawToUse = player.getYaw();
+            yawToUse = player.getYRot();
         } else {
             // If not moving, the client uses the standard body yaw logic (lagging behind the head).
             // The server's getBodyYaw() is perfect for this.
-            yawToUse = player.getBodyYaw();
+            yawToUse = player.getVisualRotationYInDegrees();
         }
 
 
@@ -84,10 +84,10 @@ public class BodyCosmetic {
         // We need to handle several player states for accurate vertical rotation.
 
         float pitchToUse;
-        if (player.isSwimming() || player.isCrawling()) {
+        if (player.isSwimming() || player.isVisuallyCrawling()) {
             // When swimming or crawling, the player's body is horizontal.
             pitchToUse = 90.0F;
-        } else if (player.isSneaking()) {
+        } else if (player.isShiftKeyDown()) {
             // Your original logic for sneaking pitch is good.
             pitchToUse = 28.0F;
         } else {
@@ -101,22 +101,22 @@ public class BodyCosmetic {
 
         // --- SENDING THE PACKET ---
         // Now we send the update packet with our predicted yaw and pitch.
-        player.getServerWorld().getChunkManager().sendToNearbyPlayers(player,
-                new EntityS2CPacket.Rotate(
+        player.serverLevel().getChunkSource().broadcastAndSend(player,
+                new ClientboundMoveEntityPacket.Rot(
                         bodyCosmetics.getId(),
-                        (byte) MathHelper.floor(yawToUse * 256.0F / 360.0F),
-                        (byte) MathHelper.floor(pitchToUse * 256.0F / 360.0F),
+                        (byte) Mth.floor(yawToUse * 256.0F / 360.0F),
+                        (byte) Mth.floor(pitchToUse * 256.0F / 360.0F),
                         false // onGround status doesn't matter much for a DisplayEntity
                 )
         );
     }
 
-    private void sendPassengersPacket(ServerPlayerEntity player, DisplayEntity bodyCosmetics){
-        PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+    private void sendPassengersPacket(ServerPlayer player, Display bodyCosmetics){
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
         buf.writeVarInt(player.getId()); // Entity ID
-        buf.writeIntArray(new int[]{bodyCosmetics.getId()}); // Passenger IDs
+        buf.writeVarIntArray(new int[]{bodyCosmetics.getId()}); // Passenger IDs
 
-        player.getServerWorld().getChunkManager().sendToNearbyPlayers(player,
+        player.serverLevel().getChunkSource().broadcastAndSend(player,
                 EntityPassengersSetS2CPacketAccessor.invokeInit(buf));
     }
 }

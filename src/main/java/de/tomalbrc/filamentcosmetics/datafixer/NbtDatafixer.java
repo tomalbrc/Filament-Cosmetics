@@ -1,9 +1,9 @@
 package de.tomalbrc.filamentcosmetics.datafixer;
 
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 
 public class NbtDatafixer {
     private static final String OLD_NBT_KEY_ITEM_SKIN_ID = "itemSkinsID";
@@ -14,14 +14,14 @@ public class NbtDatafixer {
             return false;
         }
 
-        NbtComponent customDataComponent = stack.get(DataComponentTypes.CUSTOM_DATA);
+        CustomData customDataComponent = stack.get(DataComponents.CUSTOM_DATA);
         boolean modified = false;
 
         if (customDataComponent != null) {
-            NbtCompound nbt = customDataComponent.copyNbt();
+            CompoundTag nbt = customDataComponent.copyTag();
 
-            if (nbt.contains(OLD_NBT_KEY_ITEM_SKIN_ID, NbtCompound.STRING_TYPE)) {
-                if (!nbt.contains(NEW_NBT_KEY_CUSTOM_ITEM_ID, NbtCompound.STRING_TYPE)) {
+            if (nbt.contains(OLD_NBT_KEY_ITEM_SKIN_ID, CompoundTag.TAG_STRING)) {
+                if (!nbt.contains(NEW_NBT_KEY_CUSTOM_ITEM_ID, CompoundTag.TAG_STRING)) {
                     String idValue = nbt.getString(OLD_NBT_KEY_ITEM_SKIN_ID);
                     nbt.putString(NEW_NBT_KEY_CUSTOM_ITEM_ID, idValue);
                 }
@@ -29,10 +29,10 @@ public class NbtDatafixer {
                 modified = true;
 
                 if (modified) {
-                    final NbtCompound finalNbt = nbt.copy();
-                    stack.apply(DataComponentTypes.CUSTOM_DATA,
-                            NbtComponent.DEFAULT,
-                            existing -> NbtComponent.of(finalNbt)
+                    final CompoundTag finalNbt = nbt.copy();
+                    stack.update(DataComponents.CUSTOM_DATA,
+                            CustomData.EMPTY,
+                            existing -> CustomData.of(finalNbt)
                     );
                 }
             }

@@ -4,9 +4,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.tomalbrc.filamentcosmetics.FilamentCosmetics;
 import lombok.Getter;
+import net.minecraft.core.Holder;
 import net.minecraft.item.*;
-import net.minecraft.registry.entry.RegistryEntry;
-
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.world.item.ArmorMaterials;
+import net.minecraft.world.item.Items;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -21,10 +24,10 @@ public class ArmorModelGenerator {
     private record TrimMaterial(
             String name,
             float itemModelIndex,
-            Map<RegistryEntry<ArmorMaterial>, String> overrideArmorMaterials,
+            Map<Holder<ArmorMaterial>, String> overrideArmorMaterials,
             TrimMaterialSource source
     ) {
-        public String getAppliedName(RegistryEntry<ArmorMaterial> armorMaterial) {
+        public String getAppliedName(Holder<ArmorMaterial> armorMaterial) {
             return overrideArmorMaterials.getOrDefault(armorMaterial, name);
         }
     }

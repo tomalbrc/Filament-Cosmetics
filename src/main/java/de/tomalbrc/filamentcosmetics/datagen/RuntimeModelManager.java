@@ -1,12 +1,11 @@
 package de.tomalbrc.filamentcosmetics.datagen;
 
 import de.tomalbrc.filamentcosmetics.FilamentCosmetics;
-import net.minecraft.item.ArmorItem;
-
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
+import net.minecraft.world.item.ArmorItem;
 
 public class RuntimeModelManager {
     private static final Map<String, Set<ArmorItem.Type>> requestedModels = new ConcurrentHashMap<>();

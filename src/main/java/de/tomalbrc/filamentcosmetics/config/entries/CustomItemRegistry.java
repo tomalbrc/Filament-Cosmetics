@@ -3,10 +3,6 @@ package de.tomalbrc.filamentcosmetics.config.entries;
 import de.tomalbrc.filamentcosmetics.FilamentCosmetics;
 import de.tomalbrc.filamentcosmetics.config.ConfigManager;
 import de.tomalbrc.filamentcosmetics.util.Utils;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.text.Text;
 import org.simpleyaml.configuration.file.YamlFile;
 
 import java.io.IOException;
@@ -14,6 +10,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 public class CustomItemRegistry {
 
@@ -88,8 +88,8 @@ public class CustomItemRegistry {
                     continue;
                 }
 
-                Text displayName;
-                List<Text> lore;
+                Component displayName;
+                List<Component> lore;
 
                 String type = yamlFile.getString("type");
 
@@ -210,7 +210,7 @@ public class CustomItemRegistry {
     }
 
     public static List<CustomItemEntry> getAllCosmeticsForMaterial(ItemType type, Item item) {
-        String targetMaterialId = Registries.ITEM.getId(item).toString();
+        String targetMaterialId = BuiltInRegistries.ITEM.getKey(item).toString();
         return CustomItemRegistry.getAllCosmeticsForMaterial(type, targetMaterialId);
     }
 

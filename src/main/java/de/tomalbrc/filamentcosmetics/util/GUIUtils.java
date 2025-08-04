@@ -3,7 +3,7 @@ package de.tomalbrc.filamentcosmetics.util;
 import de.tomalbrc.filamentcosmetics.config.ConfigManager;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.SimpleGui;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public class GUIUtils {
     public static void setUpButton(SimpleGui gui, ConfigManager.NavigationButton buttonConfig, Runnable callback) {

@@ -3,8 +3,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import eu.pb4.polymer.common.api.PolymerCommonUtils;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.resources.ResourceLocation;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -16,7 +15,7 @@ import java.util.Objects;
 
 public class ResourceUtils {
 
-    public static BufferedImage getTexture(Identifier identifier) {
+    public static BufferedImage getTexture(ResourceLocation identifier) {
         try {
             return ImageIO.read(Objects.requireNonNull(getJarStream("assets/" + identifier.getNamespace() + "/textures/" + identifier.getPath() + ".png")));
         } catch (Throwable e) {
@@ -25,7 +24,7 @@ public class ResourceUtils {
         }
     }
 
-    public static JsonObject getModel(Identifier identifier) {
+    public static JsonObject getModel(ResourceLocation identifier) {
         try {
             return (JsonObject) JsonParser.parseString(new String(
                     Objects.requireNonNull(getJarData("assets/" + identifier.getNamespace() + "/models/" + identifier.getPath() + " .json")), StandardCharsets.UTF_8

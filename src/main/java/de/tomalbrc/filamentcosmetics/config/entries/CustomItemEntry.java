@@ -1,11 +1,10 @@
 package de.tomalbrc.filamentcosmetics.config.entries;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
-
 import java.util.List;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 
 
-public record CustomItemEntry(String id, String permission, Text displayName, List<Text> lore, ItemStack itemStack,
+public record CustomItemEntry(String id, String permission, Component displayName, List<Component> lore, ItemStack itemStack,
                               ItemType type, String baseItemForModel) {
 }

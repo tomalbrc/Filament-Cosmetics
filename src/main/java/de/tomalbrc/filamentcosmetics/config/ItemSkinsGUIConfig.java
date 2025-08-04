@@ -3,7 +3,7 @@ package de.tomalbrc.filamentcosmetics.config;
 import de.tomalbrc.filamentcosmetics.gui.resources.GuiTextures;
 import de.tomalbrc.filamentcosmetics.util.Utils;
 import lombok.Getter;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import org.simpleyaml.configuration.ConfigurationSection;
 import org.simpleyaml.configuration.file.YamlFile;
 
@@ -74,7 +74,7 @@ public class ItemSkinsGUIConfig extends AbstractGuiConfig {
         loadNavigationButton(file, "pageIndicator");
     }
 
-    public Text getGuiName() {
+    public Component getGuiName() {
         return GuiTextures.ITEM_SKINS_MENU.apply(Utils.formatDisplayName(this.guiNameString));
     }
 

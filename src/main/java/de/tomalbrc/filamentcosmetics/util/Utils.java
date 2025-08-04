@@ -11,23 +11,22 @@ import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.standard.StandardTags;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.Registries;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import java.util.Collections;
 
 public class Utils {
     public static final LegacyComponentSerializer SERIALIZER = LegacyComponentSerializer.builder().hexColors().useUnusualXRepeatedCharacterHexFormat().build();
     public static final MiniMessage MINI_MESSAGE = MiniMessage.builder().tags(StandardTags.defaults()).build();
 
-    public static Text formatDisplayName(String st) {
+    public static Component formatDisplayName(String st) {
         StringBuilder sb = new StringBuilder(st.length());
 
         for (int i = 0; i < st.length(); i++) {
@@ -45,49 +44,49 @@ public class Utils {
         String sf = sb.toString().replace("§", "&");
         String formatted = LegacyComponentSerializer.legacySection().serialize(LegacyComponentSerializer.legacyAmpersand().deserialize(SERIALIZER.serialize(MINI_MESSAGE.deserialize(sf))));
 
-        return Text.of(formatted);
+        return Component.nullToEmpty(formatted);
     }
 
-    public static int wearCosmeticById(CommandContext<ServerCommandSource> context) {
-        final ServerPlayerEntity player;
+    public static int wearCosmeticById(CommandContext<CommandSourceStack> context) {
+        final ServerPlayer player;
         try {
-            player = EntityArgumentType.getPlayer(context, "player");
+            player = EntityArgument.getPlayer(context, "player");
         } catch (CommandSyntaxException e) {
-            context.getSource().sendError(Text.literal("Invalid player specified."));
+            context.getSource().sendFailure(Component.literal("Invalid player specified."));
             return 1;
         }
 
         String id = StringArgumentType.getString(context, "cosmeticId");
         if (id == null || id.isEmpty()) {
-            context.getSource().sendError(Text.literal("Invalid cosmetic ID."));
+            context.getSource().sendFailure(Component.literal("Invalid cosmetic ID."));
             return 1;
         }
 
         CustomItemEntry entry = CustomItemRegistry.getCosmetic(id);
 
         if (entry == null) {
-            context.getSource().sendFeedback(() -> Text.literal("Cosmetic not found with ID: " + id), false);
+            context.getSource().sendSuccess(() -> Component.literal("Cosmetic not found with ID: " + id), false);
             return 1;
         }
 
         if (!Permissions.check(player, entry.permission())) {
-            context.getSource().sendFeedback(() -> Text.literal("Selected player does not have permission to use this cosmetic."), false);
+            context.getSource().sendSuccess(() -> Component.literal("Selected player does not have permission to use this cosmetic."), false);
             return 1;
         }
 
         ItemStack cosmeticItem = entry.itemStack();
         if (cosmeticItem == null || cosmeticItem.isEmpty()) {
-            context.getSource().sendError(Text.literal("Cosmetic item definition is empty or invalid."));
+            context.getSource().sendFailure(Component.literal("Cosmetic item definition is empty or invalid."));
             return 1;
         }
 
         boolean isColorable = Items.LEATHER_HORSE_ARMOR.equals(
-                Registries.ITEM.get(Identifier.tryParse(entry.baseItemForModel()))
+                BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(entry.baseItemForModel()))
         );
 
         if (isColorable) {
             ItemStack itemForColorPicker = cosmeticItem.copy();
-            itemForColorPicker.remove(DataComponentTypes.DYED_COLOR);
+            itemForColorPicker.remove(DataComponents.DYED_COLOR);
 
             new ColorPickerComponent(player, itemForColorPicker, (coloredStack) -> {
                 var finalEntry = new CustomItemEntry(
@@ -100,12 +99,12 @@ public class Utils {
                         entry.baseItemForModel()
                 );
                 new EquipCosmeticAction().execute(player, finalEntry, null);
-                context.getSource().sendFeedback(() -> Text.literal("Equipped colored cosmetic: " + finalEntry.displayName().getString()), false);
+                context.getSource().sendSuccess(() -> Component.literal("Equipped colored cosmetic: " + finalEntry.displayName().getString()), false);
             }).open();
 
         } else {
             new EquipCosmeticAction().execute(player, entry, null);
-            context.getSource().sendFeedback(() -> Text.literal("Equipped cosmetic: " + entry.displayName().getString()), false);
+            context.getSource().sendSuccess(() -> Component.literal("Equipped cosmetic: " + entry.displayName().getString()), false);
         }
         return 0;
     }

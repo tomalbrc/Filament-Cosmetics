@@ -11,13 +11,12 @@ import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import lombok.Getter;
 import me.lucko.fabric.api.permissions.v0.Permissions;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.Registries;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -31,7 +30,7 @@ public class PagedItemDisplayGui extends SimpleGui {
     @Getter
     private final FilterManager filterManager;
 
-    public PagedItemDisplayGui(ServerPlayerEntity player, AbstractGuiConfig config, ICosmeticProvider provider, IItemAction defaultClickAction) {
+    public PagedItemDisplayGui(ServerPlayer player, AbstractGuiConfig config, ICosmeticProvider provider, IItemAction defaultClickAction) {
         super(config.screenHandlerType, player, config.replaceInventory);
         this.guiConfig = config;
         this.provider = provider;
@@ -93,7 +92,7 @@ public class PagedItemDisplayGui extends SimpleGui {
     }
 
     private IItemAction determineAction(CustomItemEntry entry) {
-        Item baseItem = Registries.ITEM.get(Identifier.tryParse(entry.baseItemForModel()));
+        Item baseItem = BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(entry.baseItemForModel()));
         if (Items.LEATHER_HORSE_ARMOR.equals(baseItem)) {
             return new OpenColorPickerAction();
         }

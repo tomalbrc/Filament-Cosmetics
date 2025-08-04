@@ -7,18 +7,6 @@ import de.tomalbrc.filamentcosmetics.util.GUIUtils;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.SignGui;
 import eu.pb4.sgui.api.gui.SimpleGui;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.CustomModelDataComponent;
-import net.minecraft.component.type.DyedColorComponent;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.Registries;
-import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableFloat;
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -26,17 +14,29 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import java.awt.Color;
 import java.util.List;
 import java.util.function.Consumer;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.CustomModelData;
+import net.minecraft.world.item.component.DyedItemColor;
 
 import static de.tomalbrc.filamentcosmetics.config.ConfigManager.COSMETICS_GUI_CONFIG;
 
 // TODO: remove mutable variables
 public class ColorPickerComponent {
 
-    private final ServerPlayerEntity player;
+    private final ServerPlayer player;
     private final ItemStack itemToColor;
     private final Consumer<ItemStack> onColorSelectCallback;
 
-    public ColorPickerComponent(ServerPlayerEntity player, ItemStack itemToColor, Consumer<ItemStack> onColorSelectCallback) {
+    public ColorPickerComponent(ServerPlayer player, ItemStack itemToColor, Consumer<ItemStack> onColorSelectCallback) {
         this.player = player;
         this.itemToColor = itemToColor.copy();
         this.onColorSelectCallback = onColorSelectCallback;
@@ -46,13 +46,13 @@ public class ColorPickerComponent {
         try {
             new ColorPickerScreen(player, itemToColor, onColorSelectCallback).open();
         } catch (Exception e) {
-            player.sendMessage(Text.literal("Error opening color picker."), false);
+            player.displayClientMessage(Component.literal("Error opening color picker."), false);
             FilamentCosmetics.LOGGER.error("Failed to open ColorPickerComponent", e);
         }
     }
 
     private static class ColorPickerScreen extends SimpleGui {
-        private final ServerPlayerEntity player;
+        private final ServerPlayer player;
         private final ItemStack hatItemStack;
         private final Consumer<ItemStack> onColorSelectCallback;
 
@@ -62,8 +62,8 @@ public class ColorPickerComponent {
         private boolean initialGradientDrawn = false;
 
 
-        public ColorPickerScreen(ServerPlayerEntity player, ItemStack hatItemStack, Consumer<ItemStack> onColorSelectCallback) {
-            super(ScreenHandlerType.GENERIC_9X5, player, true);
+        public ColorPickerScreen(ServerPlayer player, ItemStack hatItemStack, Consumer<ItemStack> onColorSelectCallback) {
+            super(MenuType.GENERIC_9x5, player, true);
             this.player = player;
             this.hatItemStack = hatItemStack.copy();
             this.onColorSelectCallback = onColorSelectCallback;
@@ -89,10 +89,10 @@ public class ColorPickerComponent {
             ItemStack templateStack;
             if (usePaintBrushView.getValue() && CosmeticsGUIConfig.getPaintItemPolymerModelData() != null) {
                 templateStack = new ItemStack(Items.LEATHER_HORSE_ARMOR);
-                templateStack.set(DataComponentTypes.CUSTOM_MODEL_DATA, new CustomModelDataComponent(CosmeticsGUIConfig.getPaintItemPolymerModelData().value()));
+                templateStack.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(CosmeticsGUIConfig.getPaintItemPolymerModelData().value()));
             } else {
                 templateStack = hatItemStack.copy();
-                templateStack.remove(DataComponentTypes.DYED_COLOR);
+                templateStack.remove(DataComponents.DYED_COLOR);
             }
 
             int[] baseColorDisplaySlots = CosmeticsGUIConfig.getColorSlots();
@@ -102,11 +102,11 @@ public class ColorPickerComponent {
                 ItemStack displayColorStack = templateStack.copy();
                 try {
                     int decimalColor = Integer.parseInt(colorHexValues[i], 16);
-                    displayColorStack.set(DataComponentTypes.DYED_COLOR, new DyedColorComponent(decimalColor, true));
+                    displayColorStack.set(DataComponents.DYED_COLOR, new DyedItemColor(decimalColor, true));
 
-                    NbtCompound nbt = new NbtCompound();
+                    CompoundTag nbt = new CompoundTag();
                     nbt.putInt("baseColorHexIndex", i);
-                    displayColorStack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbt));
+                    displayColorStack.set(DataComponents.CUSTOM_DATA, CustomData.of(nbt));
 
                     final int finalI = i;
                     this.setSlot(baseColorDisplaySlots[i], GuiElementBuilder.from(displayColorStack)
@@ -142,7 +142,7 @@ public class ColorPickerComponent {
             ItemStack gradientItem;
             if(usePaintBrushView.getValue()){
                 gradientItem = new ItemStack(Items.LEATHER_HORSE_ARMOR);
-                gradientItem.set(DataComponentTypes.CUSTOM_MODEL_DATA, new CustomModelDataComponent(CosmeticsGUIConfig.getPaintItemPolymerModelData().value()));
+                gradientItem.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(CosmeticsGUIConfig.getPaintItemPolymerModelData().value()));
             } else {
                 gradientItem = hatItemStack.copy();
             }
@@ -159,15 +159,15 @@ public class ColorPickerComponent {
                         : new Color(Color.HSBtoRGB(hsv[0], saturation.getValue() / 100F, brightnessFactor));
 
                 int stepColorRgb = gradientStepColor.getRGB();
-                gradientItem.set(DataComponentTypes.DYED_COLOR, new DyedColorComponent(stepColorRgb, true));
+                gradientItem.set(DataComponents.DYED_COLOR, new DyedItemColor(stepColorRgb, true));
 
                 this.setSlot(gradientDisplaySlots[j], GuiElementBuilder.from(gradientItem)
                         .setCallback(() -> {
                             ItemStack finalColoredHat = hatItemStack.copy();
-                            finalColoredHat.set(DataComponentTypes.DYED_COLOR, new DyedColorComponent(stepColorRgb, true));
+                            finalColoredHat.set(DataComponents.DYED_COLOR, new DyedItemColor(stepColorRgb, true));
 
                             this.setSlot(CosmeticsGUIConfig.getColorOutputSlot(), GuiElementBuilder.from(finalColoredHat.copy())
-                                    .setName(Text.literal("Click to Confirm"))
+                                    .setName(Component.literal("Click to Confirm"))
                                     .setCallback(() -> {
                                         this.close();
                                         onColorSelectCallback.accept(finalColoredHat);
@@ -210,16 +210,16 @@ public class ColorPickerComponent {
         private final ItemStack itemToColor;
         private final Consumer<ItemStack> onColorSelectCallback;
 
-        public ColorInputSign(ServerPlayerEntity player, ItemStack itemToColor, Consumer<ItemStack> onColorSelectCallback) {
+        public ColorInputSign(ServerPlayer player, ItemStack itemToColor, Consumer<ItemStack> onColorSelectCallback) {
             super(player);
             this.itemToColor = itemToColor;
             this.onColorSelectCallback = onColorSelectCallback;
 
-            this.setSignType(Registries.BLOCK.get(Identifier.of(CosmeticsGUIConfig.getSignType())));
+            this.setSignType(BuiltInRegistries.BLOCK.get(ResourceLocation.parse(CosmeticsGUIConfig.getSignType())));
             this.setColor(CosmeticsGUIConfig.getSignColor());
             List<String> lines = CosmeticsGUIConfig.getTextLines();
             for (int i = 0; i < lines.size() && i < 4; i++) {
-                this.setLine(i, Text.literal(lines.get(i)));
+                this.setLine(i, Component.literal(lines.get(i)));
             }
         }
 
@@ -239,14 +239,14 @@ public class ColorPickerComponent {
                 Color color = Color.decode(colorString);
 
                 ItemStack coloredStack = itemToColor.copy();
-                coloredStack.set(DataComponentTypes.DYED_COLOR, new DyedColorComponent(color.getRGB(), true));
+                coloredStack.set(DataComponents.DYED_COLOR, new DyedItemColor(color.getRGB(), true));
 
-                this.player.sendMessage(CosmeticsGUIConfig.getSuccessColorChangeMessage(), false);
+                this.player.displayClientMessage(CosmeticsGUIConfig.getSuccessColorChangeMessage(), false);
 
                 onColorSelectCallback.accept(coloredStack);
 
             } catch (NumberFormatException e) {
-                this.player.sendMessage(CosmeticsGUIConfig.getErrorColorChangeMessage(), false);
+                this.player.displayClientMessage(CosmeticsGUIConfig.getErrorColorChangeMessage(), false);
             }
         }
     }

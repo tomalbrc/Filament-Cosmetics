@@ -3,16 +3,16 @@ package de.tomalbrc.filamentcosmetics.util;
 import de.tomalbrc.filamentcosmetics.config.entries.ItemType;
 import de.tomalbrc.filamentcosmetics.database.DatabaseManager;
 import lombok.Getter;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 
 public class HatCosmetic {
     @Getter
     private ItemStack cosmeticItemStack = ItemStack.EMPTY;
-    private final ServerPlayerEntity player;
+    private final ServerPlayer player;
 
-    public HatCosmetic(ServerPlayerEntity player){
+    public HatCosmetic(ServerPlayer player){
         this.player = player;
     }
 
@@ -26,7 +26,7 @@ public class HatCosmetic {
 
         ItemStack targetItemStack;
         if(cosmeticItemStack.isEmpty() || cosmeticItemStack == ItemStack.EMPTY) {
-            targetItemStack = player.getInventory().getArmorStack(3);
+            targetItemStack = player.getInventory().getArmor(3);
         } else {
             targetItemStack = cosmeticStack;
         }
@@ -41,9 +41,9 @@ public class HatCosmetic {
     }
 
     public void sendHeadCosmeticsPacket(ItemStack targetItemStack){
-        this.player.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(
-                this.player.playerScreenHandler.syncId,
-                this.player.playerScreenHandler.nextRevision(),
+        this.player.connection.send(new ClientboundContainerSetSlotPacket(
+                this.player.inventoryMenu.containerId,
+                this.player.inventoryMenu.incrementStateId(),
                 5, // Head Slot
                 targetItemStack
         ));

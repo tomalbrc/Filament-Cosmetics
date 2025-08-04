@@ -8,20 +8,20 @@ import de.tomalbrc.filamentcosmetics.gui.filters.ItemTypeFilter;
 import de.tomalbrc.filamentcosmetics.gui.filters.PermissionFilter;
 import de.tomalbrc.filamentcosmetics.gui.providers.StandaloneCosmeticProvider;
 import de.tomalbrc.filamentcosmetics.util.GUIUtils;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 
 import static de.tomalbrc.filamentcosmetics.config.ConfigManager.COSMETICS_GUI_CONFIG;
 
 
 public class CosmeticsGUI {
 
-    public static int openGui(CommandContext<ServerCommandSource> ctx) {
-        ServerPlayerEntity player = ctx.getSource().getPlayer();
+    public static int openGui(CommandContext<CommandSourceStack> ctx) {
+        ServerPlayer player = ctx.getSource().getPlayer();
         if (player == null) {
-            ctx.getSource().sendFeedback(() -> Text.literal("This command can only be run by a player."), false);
+            ctx.getSource().sendSuccess(() -> Component.literal("This command can only be run by a player."), false);
             return 1;
         }
 
@@ -65,7 +65,7 @@ public class CosmeticsGUI {
             gui.open();
 
         } catch (Exception e) {
-            ctx.getSource().sendError(Text.literal("An error occurred opening the Cosmetics GUI. See console for details."));
+            ctx.getSource().sendFailure(Component.literal("An error occurred opening the Cosmetics GUI. See console for details."));
             FilamentCosmetics.LOGGER.error("Failed to open cosmetics GUI for player {}", player.getName().getString(), e);
         }
         return 0;

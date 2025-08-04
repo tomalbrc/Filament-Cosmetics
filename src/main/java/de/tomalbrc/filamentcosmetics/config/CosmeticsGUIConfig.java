@@ -6,10 +6,10 @@ import de.tomalbrc.filamentcosmetics.util.Utils;
 import eu.pb4.polymer.resourcepack.api.PolymerModelData;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import lombok.Getter;
-import net.minecraft.item.Items;
-import net.minecraft.text.Text;
-import net.minecraft.util.DyeColor;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Items;
 import org.simpleyaml.configuration.ConfigurationSection;
 import org.simpleyaml.configuration.file.YamlFile;
 
@@ -91,7 +91,7 @@ public class CosmeticsGUIConfig extends AbstractGuiConfig {
         String paintItemModelPath = file.getString("paintItemModelPath");
         if (paintItemModelPath != null && !paintItemModelPath.isEmpty()) {
             try {
-                paintItemPolymerModelData = PolymerResourcePackUtils.requestModel(Items.LEATHER_HORSE_ARMOR, Identifier.of(FilamentCosmetics.MOD_ID, "item/" + paintItemModelPath));
+                paintItemPolymerModelData = PolymerResourcePackUtils.requestModel(Items.LEATHER_HORSE_ARMOR, ResourceLocation.fromNamespaceAndPath(FilamentCosmetics.MOD_ID, "item/" + paintItemModelPath));
             } catch (Exception e) {
                 FilamentCosmetics.LOGGER.error("Failed to load paintItemModelData for path '{}': {}", paintItemModelPath, e.getMessage());
                 paintItemPolymerModelData = null;
@@ -185,19 +185,19 @@ public class CosmeticsGUIConfig extends AbstractGuiConfig {
         return new ArrayList<>(textLines); // Return a copy
     }
 
-    public static Text getSuccessColorChangeMessage() {
+    public static Component getSuccessColorChangeMessage() {
         return Utils.formatDisplayName(successMessageString);
     }
 
-    public static Text getErrorColorChangeMessage() {
+    public static Component getErrorColorChangeMessage() {
         return Utils.formatDisplayName(errorMessageString);
     }
 
-    public static Text getColorPickerGUIName() {
+    public static Component getColorPickerGUIName() {
         return Utils.formatDisplayName(colorPickerGUINameString);
     }
 
-    public Text getGuiName() {
+    public Component getGuiName() {
         return GuiTextures.COSMETICS_MENU.apply(Utils.formatDisplayName(this.guiNameString));
     }
 

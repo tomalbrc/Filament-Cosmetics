@@ -4,12 +4,6 @@ import de.tomalbrc.filamentcosmetics.FilamentCosmetics;
 import de.tomalbrc.filamentcosmetics.util.Utils;
 import eu.pb4.polymer.resourcepack.api.PolymerModelData;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
-import net.minecraft.item.Item;
-import net.minecraft.registry.Registries;
-import net.minecraft.screen.GenericContainerScreenHandler;
-import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import org.simpleyaml.configuration.ConfigurationSection;
 import org.simpleyaml.configuration.comments.format.YamlCommentFormat;
 import org.simpleyaml.configuration.file.YamlFile;
@@ -17,6 +11,12 @@ import org.simpleyaml.configuration.file.YamlFile;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.Item;
 
 public abstract class AbstractGuiConfig {
 
@@ -30,7 +30,7 @@ public abstract class AbstractGuiConfig {
     public String messageLockedString;
     public boolean pageIndicatorEnabled;
     public boolean replaceInventory;
-    public ScreenHandlerType<GenericContainerScreenHandler> screenHandlerType;
+    public MenuType<ChestMenu> screenHandlerType;
 
     public final Map<String, ConfigManager.NavigationButton> navigationButtons = new HashMap<>();
 
@@ -106,12 +106,12 @@ public abstract class AbstractGuiConfig {
             guiRows = 6;
         }
         this.screenHandlerType = switch (guiRows) {
-            case 1 -> ScreenHandlerType.GENERIC_9X1;
-            case 2 -> ScreenHandlerType.GENERIC_9X2;
-            case 3 -> ScreenHandlerType.GENERIC_9X3;
-            case 4 -> ScreenHandlerType.GENERIC_9X4;
-            case 5 -> ScreenHandlerType.GENERIC_9X5;
-            default -> ScreenHandlerType.GENERIC_9X6;
+            case 1 -> MenuType.GENERIC_9x1;
+            case 2 -> MenuType.GENERIC_9x2;
+            case 3 -> MenuType.GENERIC_9x3;
+            case 4 -> MenuType.GENERIC_9x4;
+            case 5 -> MenuType.GENERIC_9x5;
+            default -> MenuType.GENERIC_9x6;
         };
     }
 
@@ -128,10 +128,10 @@ public abstract class AbstractGuiConfig {
         }
         String complitedItemString = baseItemString.contains(":") ? baseItemString : "minecraft:" + baseItemString.toLowerCase();
 
-        Item item = Registries.ITEM.get(Identifier.of(complitedItemString));
-        if (item == Registries.ITEM.get(Registries.ITEM.getDefaultId()) && !complitedItemString.equals(Registries.ITEM.getDefaultId().toString())) {
+        Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(complitedItemString));
+        if (item == BuiltInRegistries.ITEM.get(BuiltInRegistries.ITEM.getDefaultKey()) && !complitedItemString.equals(BuiltInRegistries.ITEM.getDefaultKey().toString())) {
             FilamentCosmetics.LOGGER.error("Button '{}' in {} has invalid item id: {}. Defaulting to paper.", buttonKey, this.configFilePath.getFileName(), complitedItemString);
-            item = Registries.ITEM.get(Identifier.of("minecraft:paper"));
+            item = BuiltInRegistries.ITEM.get(ResourceLocation.parse("minecraft:paper"));
             complitedItemString = "minecraft:paper";
         }
 
@@ -140,7 +140,7 @@ public abstract class AbstractGuiConfig {
             String textureName = yamlFile.getString(basePath + ".textureName");
             if (textureName != null && !textureName.isEmpty()) {
                 try {
-                    polymerModelData = PolymerResourcePackUtils.requestModel(item, Identifier.of(FilamentCosmetics.MOD_ID, "item/" + textureName));
+                    polymerModelData = PolymerResourcePackUtils.requestModel(item, ResourceLocation.fromNamespaceAndPath(FilamentCosmetics.MOD_ID, "item/" + textureName));
                 } catch (Exception e) {
                     FilamentCosmetics.LOGGER.error("Failed to request model for button '{}' (item: {}, texture: {}): {}", buttonKey, complitedItemString, textureName, e.getMessage());
                 }
@@ -173,15 +173,15 @@ public abstract class AbstractGuiConfig {
         });
     }
 
-    public Text getGuiName() {
+    public Component getGuiName() {
         return Utils.formatDisplayName(this.guiNameString);
     }
 
-    public Text getMessageUnlocked() {
+    public Component getMessageUnlocked() {
         return Utils.formatDisplayName(this.messageUnlockedString);
     }
 
-    public Text getMessageLocked() {
+    public Component getMessageLocked() {
         return Utils.formatDisplayName(this.messageLockedString);
     }
 
@@ -189,7 +189,7 @@ public abstract class AbstractGuiConfig {
         ConfigManager.NavigationButton button = navigationButtons.get(buttonKey);
         if (button == null) {
             FilamentCosmetics.LOGGER.warn("Requested non-existent button config: '{}' from {}", buttonKey, this.configFilePath.getFileName());
-            return new ConfigManager.NavigationButton(Text.literal("Error"), Registries.ITEM.get(Identifier.of("minecraft:barrier")), null, 0, Collections.emptyList());
+            return new ConfigManager.NavigationButton(Component.literal("Error"), BuiltInRegistries.ITEM.get(ResourceLocation.parse("minecraft:barrier")), null, 0, Collections.emptyList());
         }
         return button;
     }

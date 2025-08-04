@@ -9,19 +9,19 @@ import eu.pb4.polymer.resourcepack.api.PolymerArmorModel;
 import eu.pb4.polymer.resourcepack.api.PolymerModelData;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.CustomModelDataComponent;
-import net.minecraft.component.type.DyedColorComponent;
-import net.minecraft.component.type.LoreComponent;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.Registries;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.CustomModelData;
+import net.minecraft.world.item.component.DyedItemColor;
+import net.minecraft.world.item.component.ItemLore;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.simpleyaml.configuration.comments.format.YamlCommentFormat;
@@ -44,14 +44,14 @@ public class ConfigManager {
     private static final String TARGET_TEXTURE_PATH = "assets/filamentcosmetics/textures/";
     private static final String TARGET_MODEL_PATH = "assets/filamentcosmetics/models/item/";
 
-    public record NavigationButton(Text name, Item baseItem, PolymerModelData polymerModelData, int slotIndex, List<String> lore) {}
+    public record NavigationButton(Component name, Item baseItem, PolymerModelData polymerModelData, int slotIndex, List<String> lore) {}
 
     public static String configReloadPermission;
     public static String itemSkinsReloadPermission;
     public static String cosmeticsReloadPermission;
 
-    private static Text successConfigReloadMessage;
-    private static Text errorConfigReloadMessage;
+    private static Component successConfigReloadMessage;
+    private static Component errorConfigReloadMessage;
     private static boolean legacyMode;
 
     public static final AbstractGuiConfig ITEM_SKINS_GUI_CONFIG = new ItemSkinsGUIConfig();
@@ -191,7 +191,7 @@ public class ConfigManager {
         }
     }
 
-    public static int reloadAllConfigsCommand(CommandContext<ServerCommandSource> context) {
+    public static int reloadAllConfigsCommand(CommandContext<CommandSourceStack> context) {
         try {
             createAndLoadMainConfig();
             CustomItemRegistry.legacyMode = legacyMode;
@@ -200,14 +200,14 @@ public class ConfigManager {
             COSMETICS_GUI_CONFIG.init();
             CustomItemRegistry.reloadAll();
 
-            context.getSource().sendFeedback(() -> successConfigReloadMessage, false);
+            context.getSource().sendSuccess(() -> successConfigReloadMessage, false);
         } catch (Exception e){
-            context.getSource().sendFeedback(() -> errorConfigReloadMessage, false);
+            context.getSource().sendSuccess(() -> errorConfigReloadMessage, false);
             FilamentCosmetics.LOGGER.error("An error occurred during ALL configs reload!", e);
         }
         return 1;
     }
-    public static int reloadItemSkinsConfigsCommand(CommandContext<ServerCommandSource> context) {
+    public static int reloadItemSkinsConfigsCommand(CommandContext<CommandSourceStack> context) {
         try {
             createAndLoadMainConfig();
             CustomItemRegistry.legacyMode = legacyMode;
@@ -215,15 +215,15 @@ public class ConfigManager {
             ITEM_SKINS_GUI_CONFIG.init();
             CustomItemRegistry.reloadItemSkins();
 
-            context.getSource().sendFeedback(() -> successConfigReloadMessage, false);
+            context.getSource().sendSuccess(() -> successConfigReloadMessage, false);
         } catch (Exception e){
-            context.getSource().sendFeedback(() -> errorConfigReloadMessage, false);
+            context.getSource().sendSuccess(() -> errorConfigReloadMessage, false);
             FilamentCosmetics.LOGGER.error("An error occurred during ItemSkins configs reload!", e);
         }
         return 1;
     }
 
-    public static int reloadCosmeticsConfigsCommand(CommandContext<ServerCommandSource> context) {
+    public static int reloadCosmeticsConfigsCommand(CommandContext<CommandSourceStack> context) {
         try {
             createAndLoadMainConfig();
             CustomItemRegistry.legacyMode = legacyMode;
@@ -231,9 +231,9 @@ public class ConfigManager {
             COSMETICS_GUI_CONFIG.init();
             CustomItemRegistry.reloadCosmetics();
 
-            context.getSource().sendFeedback(() -> successConfigReloadMessage, false);
+            context.getSource().sendSuccess(() -> successConfigReloadMessage, false);
         } catch (Exception e){
-            context.getSource().sendFeedback(() -> errorConfigReloadMessage, false);
+            context.getSource().sendSuccess(() -> errorConfigReloadMessage, false);
             FilamentCosmetics.LOGGER.error("An error occurred during Cosmetics configs reload!", e);
         }
         return 1;
@@ -289,11 +289,11 @@ public class ConfigManager {
         }
     }
 
-    public static ItemStack createItemStack(String baseMaterialId, Text displayName, String cosmeticOrSkinId, List<Text> loreTexts) {
-        Item baseItem = Registries.ITEM.get(Identifier.of(baseMaterialId));
-        if (baseItem == Registries.ITEM.get(Registries.ITEM.getDefaultId()) && !baseMaterialId.equals(Registries.ITEM.getDefaultId().toString())) {
+    public static ItemStack createItemStack(String baseMaterialId, Component displayName, String cosmeticOrSkinId, List<Component> loreTexts) {
+        Item baseItem = BuiltInRegistries.ITEM.get(ResourceLocation.parse(baseMaterialId));
+        if (baseItem == BuiltInRegistries.ITEM.get(BuiltInRegistries.ITEM.getDefaultKey()) && !baseMaterialId.equals(BuiltInRegistries.ITEM.getDefaultKey().toString())) {
             FilamentCosmetics.LOGGER.warn("Invalid baseMaterialId '{}' for item '{}'. Defaulting to minecraft:paper.", baseMaterialId, cosmeticOrSkinId);
-            baseItem = Registries.ITEM.get(Identifier.of("minecraft:paper")); // Fallback
+            baseItem = BuiltInRegistries.ITEM.get(ResourceLocation.parse("minecraft:paper")); // Fallback
         }
 
         PolymerModelData polymerModel;
@@ -305,35 +305,35 @@ public class ConfigManager {
                 String modelIdPath = "item/armor/" + cosmeticOrSkinId + "_" + armorItem.getType().getName().toLowerCase();
                 polymerModel = PolymerResourcePackUtils.requestModel(getItemFor(armorItem.getType()), id(modelIdPath));
             } else {
-                polymerModel = PolymerResourcePackUtils.requestModel(baseItem, Identifier.of(FilamentCosmetics.MOD_ID, "item/" + cosmeticOrSkinId));
+                polymerModel = PolymerResourcePackUtils.requestModel(baseItem, ResourceLocation.fromNamespaceAndPath(FilamentCosmetics.MOD_ID, "item/" + cosmeticOrSkinId));
             }
         } catch (Exception e) {
             FilamentCosmetics.LOGGER.error("Failed to request model for item id '{}' with base item '{}': {}", cosmeticOrSkinId, baseMaterialId, e.getMessage());
             ItemStack errorStack = new ItemStack(baseItem);
-            errorStack.set(DataComponentTypes.CUSTOM_NAME, Text.literal("Error: " + cosmeticOrSkinId));
+            errorStack.set(DataComponents.CUSTOM_NAME, Component.literal("Error: " + cosmeticOrSkinId));
             return errorStack;
         }
 
 
         ItemStack itemStack = new ItemStack(polymerModel.item());
 
-        itemStack.apply(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT, comp -> comp.apply(nbt -> {
+        itemStack.update(DataComponents.CUSTOM_DATA, CustomData.EMPTY, comp -> comp.update(nbt -> {
             nbt.putString("cosmeticItemId", cosmeticOrSkinId);
         }));
 
         if (baseItem instanceof ArmorItem armorItem && armorItem.getType() != ArmorItem.Type.BODY) {
             PolymerArmorModel armorModel = PolymerResourcePackUtils.requestArmor(id(cosmeticOrSkinId));
-            itemStack.set(DataComponentTypes.DYED_COLOR, new DyedColorComponent(armorModel.color(), true));
+            itemStack.set(DataComponents.DYED_COLOR, new DyedItemColor(armorModel.color(), true));
         }
 
         if (loreTexts != null && !loreTexts.isEmpty()) {
-            itemStack.set(DataComponentTypes.LORE, new LoreComponent(loreTexts));
+            itemStack.set(DataComponents.LORE, new ItemLore(loreTexts));
         } else {
-            itemStack.set(DataComponentTypes.LORE, new LoreComponent(Collections.emptyList()));
+            itemStack.set(DataComponents.LORE, new ItemLore(Collections.emptyList()));
         }
 
-        itemStack.set(DataComponentTypes.CUSTOM_MODEL_DATA, new CustomModelDataComponent(polymerModel.value()));
-        itemStack.set(DataComponentTypes.CUSTOM_NAME, displayName);
+        itemStack.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(polymerModel.value()));
+        itemStack.set(DataComponents.CUSTOM_NAME, displayName);
 
         return itemStack;
     }

@@ -2,15 +2,15 @@ package de.tomalbrc.filamentcosmetics.mixin;
 
 import de.tomalbrc.filamentcosmetics.config.entries.ItemType;
 import de.tomalbrc.filamentcosmetics.database.DatabaseManager;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.util.List;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 
 @Mixin(LivingEntity.class)
 public class LivingEntityMixin {
@@ -23,8 +23,8 @@ public class LivingEntityMixin {
             )
     )
     ItemStack modifyHeadSlotItem (ItemStack instance, List list, EquipmentSlot slot, ItemStack stack) {
-        if ((LivingEntity) (Object) this instanceof ServerPlayerEntity player){
-            if(slot.getEntitySlotId() == 3) {
+        if ((LivingEntity) (Object) this instanceof ServerPlayer player){
+            if(slot.getIndex() == 3) {
                 ItemStack cosmeticsIS = DatabaseManager.getCosmetic(player, ItemType.HAT);;
                 if (cosmeticsIS != ItemStack.EMPTY) {
                     return cosmeticsIS;

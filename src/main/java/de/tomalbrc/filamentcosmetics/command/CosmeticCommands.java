@@ -8,14 +8,13 @@ import de.tomalbrc.filamentcosmetics.gui.ItemSkinsGUI;
 import de.tomalbrc.filamentcosmetics.util.Utils;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
 import java.util.Objects;
 
 import static de.tomalbrc.filamentcosmetics.config.ConfigManager.*;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.literal;
 
 public class CosmeticCommands {
     public static void registerCommands(){
@@ -46,8 +45,8 @@ public class CosmeticCommands {
             );
             dispatcher.register(literal("wearcosmetic")
                     .requires(Permissions.require("filamentcosmetics.wearcosmetic", 4))
-                    .then(CommandManager.argument("player", EntityArgumentType.player())
-                            .then(CommandManager.argument("cosmeticId", StringArgumentType.string())
+                    .then(Commands.argument("player", EntityArgument.player())
+                            .then(Commands.argument("cosmeticId", StringArgumentType.string())
                                     .executes(Utils::wearCosmeticById)))
             );
             dispatcher.register(
@@ -69,7 +68,7 @@ public class CosmeticCommands {
 
     public static boolean test = false;
 
-    private static int debugCommand(CommandContext<ServerCommandSource> serverCommandSourceCommandContext) {
+    private static int debugCommand(CommandContext<CommandSourceStack> serverCommandSourceCommandContext) {
         test = !test;
         return 1;
     }

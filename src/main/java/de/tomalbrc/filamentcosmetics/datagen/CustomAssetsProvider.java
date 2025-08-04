@@ -4,26 +4,25 @@ import com.google.common.hash.HashCode;
 import de.tomalbrc.filamentcosmetics.FilamentCosmetics;
 import de.tomalbrc.filamentcosmetics.gui.resources.UiResourceCreator;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.minecraft.data.DataOutput;
+import net.minecraft.Util;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.DataWriter;
-import net.minecraft.util.Util;
-
+import net.minecraft.data.PackOutput;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
 public class CustomAssetsProvider implements DataProvider {
-    private final DataOutput output;
+    private final PackOutput output;
 
     public CustomAssetsProvider(FabricDataOutput output) {
         this.output = output;
     }
     @Override
-    public CompletableFuture<?> run(DataWriter writer) {
+    public CompletableFuture<?> run(CachedOutput writer) {
         BiConsumer<String, byte[]> assetWriter = (path, data) -> {
             try {
-                writer.write(this.output.getPath().resolve(path), data, HashCode.fromBytes(data));
+                writer.writeIfNeeded(this.output.getOutputFolder().resolve(path), data, HashCode.fromBytes(data));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -34,7 +33,7 @@ public class CustomAssetsProvider implements DataProvider {
             } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
-        }, Util.getMainWorkerExecutor());
+        }, Util.backgroundExecutor());
     }
 
     @Override
