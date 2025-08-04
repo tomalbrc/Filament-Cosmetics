@@ -1,0 +1,6 @@
+type: HAT
+cosmetic-item:
+  material: PAPER
+  display-name: "&bShogun"
+
+permission: "cosmetics.hat.shogun"
