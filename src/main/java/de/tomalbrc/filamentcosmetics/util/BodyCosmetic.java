@@ -2,9 +2,6 @@ package de.tomalbrc.filamentcosmetics.util;
 
 import de.tomalbrc.filamentcosmetics.config.entries.ItemType;
 import de.tomalbrc.filamentcosmetics.database.DatabaseManager;
-import de.tomalbrc.filamentcosmetics.mixin.EntityPassengersSetS2CPacketAccessor;
-import io.netty.buffer.Unpooled;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
@@ -48,7 +45,6 @@ public class BodyCosmetic {
                 new ClientboundSetEntityDataPacket(bodyCosmetics.getId(),
                         bodyCosmetics.getEntityData().getNonDefaultValues()));
 
-        sendPassengersPacket(player, bodyCosmetics);
         bodyCosmetics.startRiding(player);
     }
 
@@ -109,14 +105,5 @@ public class BodyCosmetic {
                         false // onGround status doesn't matter much for a DisplayEntity
                 )
         );
-    }
-
-    private void sendPassengersPacket(ServerPlayer player, Display bodyCosmetics){
-        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-        buf.writeVarInt(player.getId()); // Entity ID
-        buf.writeVarIntArray(new int[]{bodyCosmetics.getId()}); // Passenger IDs
-
-        player.serverLevel().getChunkSource().broadcastAndSend(player,
-                EntityPassengersSetS2CPacketAccessor.invokeInit(buf));
     }
 }

@@ -2,14 +2,12 @@ package de.tomalbrc.filamentcosmetics.util;
 
 import de.tomalbrc.filamentcosmetics.config.entries.ItemType;
 import de.tomalbrc.filamentcosmetics.database.DatabaseManager;
-import lombok.Getter;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
 public class HatCosmetic {
-    @Getter
-    private ItemStack cosmeticItemStack = ItemStack.EMPTY;
+    public ItemStack cosmeticItemStack = ItemStack.EMPTY;
     private final ServerPlayer player;
 
     public HatCosmetic(ServerPlayer player){

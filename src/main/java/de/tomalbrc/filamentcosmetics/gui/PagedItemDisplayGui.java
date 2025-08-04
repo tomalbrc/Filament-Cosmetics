@@ -9,7 +9,6 @@ import de.tomalbrc.filamentcosmetics.gui.filters.FilterManager;
 import de.tomalbrc.filamentcosmetics.util.GUIUtils;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.SimpleGui;
-import lombok.Getter;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -17,7 +16,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import java.util.*;
+
+import java.util.Comparator;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -27,8 +28,8 @@ public class PagedItemDisplayGui extends SimpleGui {
     private IItemAction defaultClickAction;
     private final AbstractGuiConfig guiConfig;
     private int currentPage = 0;
-    @Getter
-    private final FilterManager filterManager;
+
+    public final FilterManager filterManager;
 
     public PagedItemDisplayGui(ServerPlayer player, AbstractGuiConfig config, ICosmeticProvider provider, IItemAction defaultClickAction) {
         super(config.screenHandlerType, player, config.replaceInventory);

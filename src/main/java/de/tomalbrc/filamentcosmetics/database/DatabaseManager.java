@@ -61,15 +61,15 @@ public class DatabaseManager {
             Integer dyedColor = getDyedColorFromStack(itemStack);
 
             if (existingEntry != null) {
-                existingEntry.setCosmeticId(cosmeticId);
-                existingEntry.setDyedColor(dyedColor);
+                existingEntry.cosmeticId = cosmeticId;
+                existingEntry.dyedColor = dyedColor;
                 cosmeticDao.update(existingEntry);
             } else {
                 CosmeticTable newEntry = new CosmeticTable();
-                newEntry.setUuid(player.getStringUUID());
-                newEntry.setCosmeticType(type.toString());
-                newEntry.setCosmeticId(cosmeticId);
-                newEntry.setDyedColor(dyedColor);
+                newEntry.uuid = (player.getStringUUID());
+                newEntry.cosmeticType = (type.toString());
+                newEntry.cosmeticId = (cosmeticId);
+                newEntry.dyedColor = (dyedColor);
                 cosmeticDao.create(newEntry);
             }
         } catch (SQLException e) {
@@ -82,13 +82,13 @@ public class DatabaseManager {
         try {
             CosmeticTable cosmeticData = findEntry(player.getStringUUID(), type);
 
-            if (cosmeticData == null || cosmeticData.getCosmeticId() == null) {
+            if (cosmeticData == null || cosmeticData.cosmeticId == null) {
                 return ItemStack.EMPTY;
             }
 
-            CustomItemEntry cosmeticDefinition = CustomItemRegistry.getCosmetic(cosmeticData.getCosmeticId());
+            CustomItemEntry cosmeticDefinition = CustomItemRegistry.getCosmetic(cosmeticData.cosmeticId);
             if (cosmeticDefinition == null) {
-                FilamentCosmetics.LOGGER.warn("Player {} has cosmetic '{}' equipped, but it's no longer registered.", player.getName().getString(), cosmeticData.getCosmeticId());
+                FilamentCosmetics.LOGGER.warn("Player {} has cosmetic '{}' equipped, but it's no longer registered.", player.getName().getString(), cosmeticData.cosmeticId);
                 return ItemStack.EMPTY;
             }
 
@@ -97,8 +97,8 @@ public class DatabaseManager {
             }
 
             ItemStack cosmeticStack = cosmeticDefinition.itemStack().copy();
-            if (cosmeticData.getDyedColor() != null) {
-                cosmeticStack.set(DataComponents.DYED_COLOR, new DyedItemColor(cosmeticData.getDyedColor(), true));
+            if (cosmeticData.dyedColor != null) {
+                cosmeticStack.set(DataComponents.DYED_COLOR, new DyedItemColor(cosmeticData.dyedColor, true));
             }
             return cosmeticStack;
         } catch (SQLException e) {

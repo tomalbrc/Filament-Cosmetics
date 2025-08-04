@@ -5,7 +5,6 @@ import de.tomalbrc.filamentcosmetics.gui.resources.GuiTextures;
 import de.tomalbrc.filamentcosmetics.util.Utils;
 import eu.pb4.polymer.resourcepack.api.PolymerModelData;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
-import lombok.Getter;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
@@ -16,32 +15,20 @@ import org.simpleyaml.configuration.file.YamlFile;
 import java.util.*;
 
 public class CosmeticsGUIConfig extends AbstractGuiConfig {
+    public static int[] colorSlots;
+    public static int[] colorGradientSlots;
+    public static int colorInputSlot;
+    public static int colorOutputSlot;
+    public static String[] colorHexValues;
+    public static String colorPickerGUINameString;
+    public static float saturationAdjustmentValue;
+    public static String signType;
+    public static PolymerModelData paintItemPolymerModelData;
+    public static DyeColor signColor;
+    public static String successMessageString;
+    public static String errorMessageString;
 
-    @Getter
-    private static int[] colorSlots;
-    @Getter
-    private static int[] colorGradientSlots;
-    @Getter
-    private static int colorInputSlot;
-    @Getter
-    private static int colorOutputSlot;
-    @Getter
-    private static String[] colorHexValues;
-    @Getter
-    private static String colorPickerGUINameString;
-    @Getter
-    private static float saturationAdjustmentValue;
-    @Getter
-    private static String signType;
-    @Getter
-    private static PolymerModelData paintItemPolymerModelData;
-    @Getter
-    private static DyeColor signColor;
     private static List<String> textLines;
-    @Getter
-    private static String successMessageString;
-    @Getter
-    private static String errorMessageString;
 
     public CosmeticsGUIConfig() {
         super("CosmeticsGUI.yml");

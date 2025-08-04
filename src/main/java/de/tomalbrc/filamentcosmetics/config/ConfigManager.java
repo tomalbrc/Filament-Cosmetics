@@ -3,7 +3,6 @@ package de.tomalbrc.filamentcosmetics.config;
 import com.mojang.brigadier.context.CommandContext;
 import de.tomalbrc.filamentcosmetics.FilamentCosmetics;
 import de.tomalbrc.filamentcosmetics.config.entries.CustomItemRegistry;
-import de.tomalbrc.filamentcosmetics.datagen.RuntimeModelManager;
 import de.tomalbrc.filamentcosmetics.util.Utils;
 import eu.pb4.polymer.resourcepack.api.PolymerArmorModel;
 import eu.pb4.polymer.resourcepack.api.PolymerModelData;
@@ -70,9 +69,6 @@ public class ConfigManager {
 
     public static void registerResourcePackListener() {
         PolymerResourcePackUtils.RESOURCE_PACK_CREATION_EVENT.register((builder) -> {
-            // Generate and add runtime armor models
-            RuntimeModelManager.generateAndProvideModels(builder::addData);
-
             Path resourcePackSourceDir = SERVER_COSMETICS_DIR.resolve("Assets");
 
             if (Files.isDirectory(resourcePackSourceDir)) {
@@ -299,9 +295,6 @@ public class ConfigManager {
         PolymerModelData polymerModel;
         try {
             if (baseItem instanceof ArmorItem armorItem && armorItem.getType() != ArmorItem.Type.BODY) {
-//                System.out.println("Requesting armor model for " + baseItem + " with id " + cosmeticOrSkinId + " and type " + armorItem.getType());
-                RuntimeModelManager.requestArmorModel(cosmeticOrSkinId, armorItem.getType());
-
                 String modelIdPath = "item/armor/" + cosmeticOrSkinId + "_" + armorItem.getType().getName().toLowerCase();
                 polymerModel = PolymerResourcePackUtils.requestModel(getItemFor(armorItem.getType()), id(modelIdPath));
             } else {

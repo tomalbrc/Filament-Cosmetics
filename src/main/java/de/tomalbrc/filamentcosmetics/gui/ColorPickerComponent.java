@@ -73,10 +73,10 @@ public class ColorPickerComponent {
         }
 
         private void populateGui() {
-            this.setSlot(CosmeticsGUIConfig.getColorInputSlot(), GuiElementBuilder.from(hatItemStack));
+            this.setSlot(CosmeticsGUIConfig.colorInputSlot, GuiElementBuilder.from(hatItemStack));
             drawBaseColorSlots();
-            if (!initialGradientDrawn && CosmeticsGUIConfig.getColorSlots().length > 0) {
-                selectedBaseColorSlotIndex.setValue(CosmeticsGUIConfig.getColorSlots()[0]);
+            if (!initialGradientDrawn && CosmeticsGUIConfig.colorSlots.length > 0) {
+                selectedBaseColorSlotIndex.setValue(CosmeticsGUIConfig.colorSlots[0]);
                 drawGradientSlots();
                 initialGradientDrawn = true;
             }
@@ -87,16 +87,16 @@ public class ColorPickerComponent {
 
         public void drawBaseColorSlots() {
             ItemStack templateStack;
-            if (usePaintBrushView.getValue() && CosmeticsGUIConfig.getPaintItemPolymerModelData() != null) {
+            if (usePaintBrushView.getValue() && CosmeticsGUIConfig.paintItemPolymerModelData != null) {
                 templateStack = new ItemStack(Items.LEATHER_HORSE_ARMOR);
-                templateStack.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(CosmeticsGUIConfig.getPaintItemPolymerModelData().value()));
+                templateStack.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(CosmeticsGUIConfig.paintItemPolymerModelData.value()));
             } else {
                 templateStack = hatItemStack.copy();
                 templateStack.remove(DataComponents.DYED_COLOR);
             }
 
-            int[] baseColorDisplaySlots = CosmeticsGUIConfig.getColorSlots();
-            String[] colorHexValues = CosmeticsGUIConfig.getColorHexValues();
+            int[] baseColorDisplaySlots = CosmeticsGUIConfig.colorSlots;
+            String[] colorHexValues = CosmeticsGUIConfig.colorHexValues;
 
             for (int i = 0; i < baseColorDisplaySlots.length && i < colorHexValues.length; i++) {
                 ItemStack displayColorStack = templateStack.copy();
@@ -127,10 +127,10 @@ public class ColorPickerComponent {
         }
 
         private void drawGradientSlots() {
-            if (selectedBaseColorSlotIndex.getValue() < 0 || selectedBaseColorSlotIndex.getValue() >= CosmeticsGUIConfig.getColorHexValues().length) {
+            if (selectedBaseColorSlotIndex.getValue() < 0 || selectedBaseColorSlotIndex.getValue() >= CosmeticsGUIConfig.colorHexValues.length) {
                 return;
             }
-            String baseHex = CosmeticsGUIConfig.getColorHexValues()[selectedBaseColorSlotIndex.getValue()];
+            String baseHex = CosmeticsGUIConfig.colorHexValues[selectedBaseColorSlotIndex.getValue()];
             Color baseColor;
             try {
                 baseColor = new Color(Integer.parseInt(baseHex, 16));
@@ -142,13 +142,13 @@ public class ColorPickerComponent {
             ItemStack gradientItem;
             if(usePaintBrushView.getValue()){
                 gradientItem = new ItemStack(Items.LEATHER_HORSE_ARMOR);
-                gradientItem.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(CosmeticsGUIConfig.getPaintItemPolymerModelData().value()));
+                gradientItem.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(CosmeticsGUIConfig.paintItemPolymerModelData.value()));
             } else {
                 gradientItem = hatItemStack.copy();
             }
 
             float[] hsv = Color.RGBtoHSB(baseColor.getRed(), baseColor.getGreen(), baseColor.getBlue(), null);
-            int[] gradientDisplaySlots = CosmeticsGUIConfig.getColorGradientSlots();
+            int[] gradientDisplaySlots = CosmeticsGUIConfig.colorGradientSlots;
 
             for (int j = 0; j < gradientDisplaySlots.length; j++) {
                 float brightnessFactor = (1.0f / (gradientDisplaySlots.length + 1)) * (j + 1.0f);
@@ -166,7 +166,7 @@ public class ColorPickerComponent {
                             ItemStack finalColoredHat = hatItemStack.copy();
                             finalColoredHat.set(DataComponents.DYED_COLOR, new DyedItemColor(stepColorRgb, true));
 
-                            this.setSlot(CosmeticsGUIConfig.getColorOutputSlot(), GuiElementBuilder.from(finalColoredHat.copy())
+                            this.setSlot(CosmeticsGUIConfig.colorOutputSlot, GuiElementBuilder.from(finalColoredHat.copy())
                                     .setName(Component.literal("Click to Confirm"))
                                     .setCallback(() -> {
                                         this.close();
@@ -180,13 +180,13 @@ public class ColorPickerComponent {
 
         public void setupBrightnessButtons() {
             GUIUtils.setUpButton(this, COSMETICS_GUI_CONFIG.getButtonConfig("decreaseBrightness"), () -> {
-                saturation.subtract(CosmeticsGUIConfig.getSaturationAdjustmentValue());
+                saturation.subtract(CosmeticsGUIConfig.saturationAdjustmentValue);
                 if (saturation.getValue() < 15F) saturation.setValue(15F);
                 drawGradientSlots();
             });
 
             GUIUtils.setUpButton(this, COSMETICS_GUI_CONFIG.getButtonConfig("increaseBrightness"), () -> {
-                saturation.add(CosmeticsGUIConfig.getSaturationAdjustmentValue());
+                saturation.add(CosmeticsGUIConfig.saturationAdjustmentValue);
                 if (saturation.getValue() > 100F) saturation.setValue(100F);
                 drawGradientSlots();
             });
@@ -215,8 +215,8 @@ public class ColorPickerComponent {
             this.itemToColor = itemToColor;
             this.onColorSelectCallback = onColorSelectCallback;
 
-            this.setSignType(BuiltInRegistries.BLOCK.get(ResourceLocation.parse(CosmeticsGUIConfig.getSignType())));
-            this.setColor(CosmeticsGUIConfig.getSignColor());
+            this.setSignType(BuiltInRegistries.BLOCK.get(ResourceLocation.parse(CosmeticsGUIConfig.signType)));
+            this.setColor(CosmeticsGUIConfig.signColor);
             List<String> lines = CosmeticsGUIConfig.getTextLines();
             for (int i = 0; i < lines.size() && i < 4; i++) {
                 this.setLine(i, Component.literal(lines.get(i)));

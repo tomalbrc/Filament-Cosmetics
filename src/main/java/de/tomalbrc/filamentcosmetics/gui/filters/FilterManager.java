@@ -5,7 +5,6 @@ import de.tomalbrc.filamentcosmetics.config.entries.CustomItemEntry;
 import de.tomalbrc.filamentcosmetics.config.entries.ItemType;
 import de.tomalbrc.filamentcosmetics.gui.PagedItemDisplayGui;
 import de.tomalbrc.filamentcosmetics.util.GUIUtils;
-import lombok.Getter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,8 +14,8 @@ public class FilterManager {
     private final PagedItemDisplayGui gui;
     private final Map<String, FilterRegistration> registeredFilters = new HashMap<>();
     private final Map<String, Boolean> activeStates = new HashMap<>();
-    @Getter
-    private ItemType targetType;
+
+    public ItemType targetType;
 
     private record FilterRegistration(Predicate<CustomItemEntry> filter, ConfigManager.NavigationButton activeButton, ConfigManager.NavigationButton inactiveButton) {}
 

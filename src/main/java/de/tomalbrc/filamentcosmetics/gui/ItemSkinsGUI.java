@@ -32,7 +32,7 @@ public class ItemSkinsGUI {
             ItemStack handStack = player.getMainHandItem();
             var config = ITEM_SKINS_GUI_CONFIG;
             var provider = new ItemSkinProvider(handStack.getItem());
-            var action = new ApplySkinAction(handStack, ItemSkinsGUIConfig.getItemSlot());
+            var action = new ApplySkinAction(handStack, ItemSkinsGUIConfig.itemSlot);
             PagedItemDisplayGui gui = new PagedItemDisplayGui(player, config, provider, action) {
                 @Override
                 public boolean onAnyClick(int idx, ClickType ct, net.minecraft.world.inventory.ClickType sa) {
@@ -41,7 +41,7 @@ public class ItemSkinsGUI {
                         if (!newClicked.isEmpty()) {
                             GuiHelpers.sendPlayerScreenHandler(this.player);
                             var newProvider = new ItemSkinProvider(newClicked.getItem());
-                            var newAction = new ApplySkinAction(newClicked, ItemSkinsGUIConfig.getItemSlot());
+                            var newAction = new ApplySkinAction(newClicked, ItemSkinsGUIConfig.itemSlot);
                             this.reinitialize(newProvider, newAction);
 
                             setupDynamicSlots(this, newClicked);
@@ -50,7 +50,7 @@ public class ItemSkinsGUI {
                     return super.onAnyClick(idx, ct, sa);
                 }
             };
-            gui.getFilterManager().addFilter(
+            gui.filterManager.addFilter(
                     "permission",
                     new PermissionFilter(player),
                     config.getButtonConfig("filter.show-all-skins"),
@@ -58,7 +58,7 @@ public class ItemSkinsGUI {
                     false
             );
 
-            gui.setSlot(ItemSkinsGUIConfig.getItemSlot(), new GuiElementBuilder(Items.BARRIER)
+            gui.setSlot(ItemSkinsGUIConfig.itemSlot, new GuiElementBuilder(Items.BARRIER)
                     .setName(Component.literal("Select an Item"))
                     .addLoreLine(Component.literal("Click an item in your inventory below.")));
 
@@ -78,13 +78,13 @@ public class ItemSkinsGUI {
     private static void setupDynamicSlots(PagedItemDisplayGui gui, ItemStack targetStack) {
         var config = ITEM_SKINS_GUI_CONFIG;
 
-        gui.setSlot(ItemSkinsGUIConfig.getItemSlot(), targetStack.copy());
+        gui.setSlot(ItemSkinsGUIConfig.itemSlot, targetStack.copy());
 
         GUIUtils.setUpButton(gui, config.getButtonConfig("removeSkin"), () -> {
                 targetStack.update(DataComponents.CUSTOM_DATA, CustomData.EMPTY, comp -> comp.update(nbt -> nbt.remove("cosmeticItemId")));
                 targetStack.remove(DataComponents.CUSTOM_MODEL_DATA);
 
-                gui.setSlot(ItemSkinsGUIConfig.getItemSlot(), targetStack.copy());
+                gui.setSlot(ItemSkinsGUIConfig.itemSlot, targetStack.copy());
         });
     }
 }

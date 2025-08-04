@@ -32,7 +32,7 @@ public class CosmeticsGUI {
 
             PagedItemDisplayGui gui = new PagedItemDisplayGui(player, config, provider, action);
 
-            gui.getFilterManager().addFilter(
+            gui.filterManager.addFilter(
                     "permission",
                     new PermissionFilter(player),
                     config.getButtonConfig("filter.show-all-skins"),
@@ -40,7 +40,7 @@ public class CosmeticsGUI {
                     false
             );
 
-            gui.getFilterManager().addFilter(
+            gui.filterManager.addFilter(
                     "hat",
                     new ItemTypeFilter(ItemType.HAT),
                     config.getButtonConfig("filter.hats-disabled"),
@@ -48,7 +48,7 @@ public class CosmeticsGUI {
                     true
             );
 
-            gui.getFilterManager().addFilter(
+            gui.filterManager.addFilter(
                     "body-cosmetic",
                     new ItemTypeFilter(ItemType.BODY_COSMETIC),
                     config.getButtonConfig("filter.body-cosmetics-disabled"),
@@ -58,7 +58,7 @@ public class CosmeticsGUI {
 
             GUIUtils.setUpButton(gui, config.getButtonConfig("removeSkin"), () -> {
                 gui.close();
-                action.execute(player, ItemStack.EMPTY, gui.getFilterManager().getTargetType());
+                action.execute(player, ItemStack.EMPTY, gui.filterManager.targetType);
             });
 
             gui.reinitialize(provider, action);

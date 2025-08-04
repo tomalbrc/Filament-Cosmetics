@@ -2,7 +2,6 @@ package de.tomalbrc.filamentcosmetics.config;
 
 import de.tomalbrc.filamentcosmetics.gui.resources.GuiTextures;
 import de.tomalbrc.filamentcosmetics.util.Utils;
-import lombok.Getter;
 import net.minecraft.network.chat.Component;
 import org.simpleyaml.configuration.ConfigurationSection;
 import org.simpleyaml.configuration.file.YamlFile;
@@ -10,9 +9,7 @@ import org.simpleyaml.configuration.file.YamlFile;
 import java.util.*;
 
 public class ItemSkinsGUIConfig extends AbstractGuiConfig {
-
-    @Getter
-    private static int itemSlot;
+    public static int itemSlot;
 
     private static ItemSkinsGUIConfig instance;
 
